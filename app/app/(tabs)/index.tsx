@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { AppButton } from "../../src/components/AppButton";
@@ -7,12 +8,14 @@ import { AppScreen } from "../../src/components/AppScreen";
 import { Colors } from "../../src/theme/colors";
 import { BorderRadius, Shadow, Spacing } from "../../src/theme/spacing";
 export default function HomeScreen() {
+  const router = useRouter();
+
   function handleParentLogin() {
-    console.log("Parent login pressed");
+    router.push("/parent/home" as any);
   }
 
   function handleTeacherLogin() {
-    console.log("Teacher login pressed");
+    router.push("/teacher/home" as any);
   }
 
   return (
