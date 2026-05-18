@@ -22,6 +22,23 @@ export default function TeacherHomeScreen() {
               <Text style={styles.statLabel}>Present Today</Text>
             </AppCard>
           </View>
+          <AppCard style={styles.actionsCard}>
+            <Text style={styles.actionsTitle}>Quick Actions</Text>
+            <View style={styles.actionsGrid}>
+              <View style={styles.actionItem}>
+                <Text style={styles.actionText}>Children</Text>
+              </View>
+              <View style={styles.actionItem}>
+                <Text style={styles.actionText}>Attendance</Text>
+              </View>
+              <View style={styles.actionItem}>
+                <Text style={styles.actionText}>Daily Report</Text>
+              </View>
+              <View style={styles.actionItem}>
+                <Text style={styles.actionText}>Contracts</Text>
+              </View>
+            </View>
+          </AppCard>
           <AppCard style={styles.card}>
             <Text style={styles.cardTitle}>Today Overview</Text>
             <Text style={styles.cardText}>Attendance and daily actions will appear here.</Text>
@@ -77,5 +94,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textSecondary,
     marginTop: Spacing.xs,
+  },
+  actionsCard: {
+    marginTop: Spacing.lg,
+  },
+  actionsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: Colors.textPrimary,
+    marginBottom: Spacing.md,
+  },
+  actionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  actionItem: {
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  actionText: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    fontWeight: "500",
   },
 });
