@@ -11,37 +11,37 @@ export default function TeacherHomeScreen() {
     <View style={styles.root}>
       <AppScreen scrollable>
         <View style={styles.content}>
-          <Text style={styles.title}>Teacher Home</Text>
+          <Text style={styles.title}>בוקר טוב, נונה</Text>
           <View style={styles.statsRow}>
             <AppCard style={styles.statCard}>
               <Text style={styles.statNumber}>22</Text>
-              <Text style={styles.statLabel}>Children</Text>
+              <Text style={styles.statLabel}>ילדים בגן</Text>
             </AppCard>
             <AppCard style={styles.statCard}>
               <Text style={styles.statNumber}>16</Text>
-              <Text style={styles.statLabel}>Present Today</Text>
+              <Text style={styles.statLabel}>נוכחים היום</Text>
             </AppCard>
           </View>
           <AppCard style={styles.actionsCard}>
-            <Text style={styles.actionsTitle}>Quick Actions</Text>
+            <Text style={styles.actionsTitle}>פעולות מהירות</Text>
             <View style={styles.actionsGrid}>
               <View style={styles.actionItem}>
-                <Text style={styles.actionText}>Children</Text>
+                <Text style={styles.actionText}>ילדים</Text>
               </View>
               <View style={styles.actionItem}>
-                <Text style={styles.actionText}>Attendance</Text>
+                <Text style={styles.actionText}>נוכחות</Text>
               </View>
               <View style={styles.actionItem}>
-                <Text style={styles.actionText}>Daily Report</Text>
+                <Text style={styles.actionText}>סיכום יום</Text>
               </View>
               <View style={styles.actionItem}>
-                <Text style={styles.actionText}>Contracts</Text>
+                <Text style={styles.actionText}>חוזים</Text>
               </View>
             </View>
           </AppCard>
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>Today Overview</Text>
-            <Text style={styles.cardText}>Attendance and daily actions will appear here.</Text>
+            <Text style={styles.cardTitle}>סקירת היום</Text>
+            <Text style={styles.cardText}>כאן יופיעו נוכחות, פעולות יומיות ועדכונים מהגן.</Text>
           </AppCard>
         </View>
       </AppScreen>
