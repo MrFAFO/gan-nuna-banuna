@@ -12,19 +12,26 @@ export default function ParentHomeScreen() {
       <AppScreen scrollable>
         <View style={styles.content}>
           <Text style={styles.title}>שלום רחל</Text>
+
+          <View style={styles.childInfo}>
+            <Text style={styles.childName}>נועה</Text>
+            <Text style={styles.childSubtitle}>היום בגן נונה בנונה</Text>
+          </View>
+
           <AppCard style={styles.card}>
             <Text style={styles.cardTitle}>סיכום היום</Text>
             <Text style={styles.cardText}>כאן יופיעו עדכונים יומיים מהגן.</Text>
           </AppCard>
-            <AppCard style={styles.card}>
-    <Text style={styles.cardTitle}>חוזה ממתין לחתימה</Text>
-    <Text style={styles.cardText}>
-      ניתן יהיה לעיין בחוזה ולעבור לחתימה דיגיטלית בהמשך.
-    </Text>
-  </AppCard>
 
+          <AppCard style={styles.card}>
+            <Text style={styles.cardTitle}>חוזה ממתין לחתימה</Text>
+            <Text style={styles.cardText}>
+              ניתן יהיה לעיין בחוזה ולעבור לחתימה דיגיטלית בהמשך.
+            </Text>
+          </AppCard>
         </View>
       </AppScreen>
+
       <BottomNavBar activeItem="home" />
     </View>
   );
@@ -42,6 +49,20 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "700",
     color: Colors.textPrimary,
+  },
+  childInfo: {
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.md,
+  },
+  childName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: Colors.textPrimary,
+  },
+  childSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginTop: Spacing.xs,
   },
   card: {
     marginTop: Spacing.lg,
