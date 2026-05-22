@@ -432,13 +432,13 @@ Current status:
 
 \- Works
 
-\- Shows greeting: שלום רחל
+\- Shows greeting using mockParent.name
 
 \- Shows child info:
 
-&#x20; - נועה
+&#x20; - Child name from mockChildren with mockParentChildId
 
-&#x20; - היום בגן נונה בנונה
+&#x20; - Kindergarten subtitle is still hardcoded for now
 
 \- Shows daily summary card
 
@@ -458,7 +458,9 @@ Current status:
 
 Current limitation:
 
-\- Text is hardcoded placeholder data
+\- Some data now comes from mock data
+
+\- Some text is still hardcoded placeholder data
 
 \- Later this data should come from authenticated parent, child profile, daily report data, and contract status data
 
@@ -711,6 +713,8 @@ Parent home currently includes:
 \- Greeting
 
 \- Child info section
+
+\- Parent and child names connected to mock data
 
 \- Daily summary card
 
