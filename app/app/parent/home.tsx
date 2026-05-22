@@ -5,16 +5,20 @@ import { AppCard } from "../../src/components/AppCard";
 import { BottomNavBar } from "../../src/components/BottomNavBar";
 import { Colors } from "../../src/theme/colors";
 import { Spacing } from "../../src/theme/spacing";
+import { mockParent, mockParentChildId } from "../../src/data/mockParent";
+import { mockChildren } from "../../src/data/mockChildren";
 
 export default function ParentHomeScreen() {
+  const parentChild = mockChildren.find((child) => child.id === mockParentChildId);
+
   return (
     <View style={styles.root}>
       <AppScreen scrollable>
         <View style={styles.content}>
-          <Text style={styles.title}>שלום רחל</Text>
+          <Text style={styles.title}>שלום {mockParent.name}</Text>
 
           <View style={styles.childInfo}>
-            <Text style={styles.childName}>נועה</Text>
+            <Text style={styles.childName}>{parentChild?.name ?? "ילד/ה"}</Text>
             <Text style={styles.childSubtitle}>היום בגן נונה בנונה</Text>
           </View>
 
