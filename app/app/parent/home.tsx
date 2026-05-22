@@ -7,9 +7,25 @@ import { Colors } from "../../src/theme/colors";
 import { Spacing } from "../../src/theme/spacing";
 import { mockParent, mockParentChildId } from "../../src/data/mockParent";
 import { mockChildren } from "../../src/data/mockChildren";
+import { mockContracts } from "../../src/data/mockContracts";
 
 export default function ParentHomeScreen() {
   const parentChild = mockChildren.find((child) => child.id === mockParentChildId);
+  const parentContract = mockContracts.find((contract) => contract.childId === parentChild?.id);
+
+  let contractTitle = "אין חוזה פעיל";
+  let contractText = "לא נמצא חוזה משויך לילד/ה.";
+
+  if (parentContract?.status === "sent") {
+    contractTitle = "חוזה ממתין לחתימה";
+    contractText = "ניתן לעיין בחוזה ולעבור לחתימה דיגיטלית בהמשך.";
+  } else if (parentContract?.status === "signed") {
+    contractTitle = "החוזה חתום";
+    contractText = "החוזה לשנת הפעילות הנוכחית חתום ושמור במערכת.";
+  } else if (parentContract?.status === "expired") {
+    contractTitle = "החוזה פג תוקף";
+    contractText = "יש צורך לחדש את החוזה מול הגן.";
+  }
 
   return (
     <View style={styles.root}>
@@ -28,10 +44,8 @@ export default function ParentHomeScreen() {
           </AppCard>
 
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>חוזה ממתין לחתימה</Text>
-            <Text style={styles.cardText}>
-              ניתן יהיה לעיין בחוזה ולעבור לחתימה דיגיטלית בהמשך.
-            </Text>
+            <Text style={styles.cardTitle}>{contractTitle}</Text>
+            <Text style={styles.cardText}>{contractText}</Text>
           </AppCard>
 
           <AppCard style={styles.actionsCard}>
