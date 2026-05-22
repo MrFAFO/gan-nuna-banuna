@@ -442,7 +442,11 @@ Current status:
 
 \- Shows daily summary card
 
-\- Shows contract reminder card
+\- Shows contract reminder card using mockContracts:
+
+&#x20; - Contract matched by parentChild.id
+
+&#x20; - Title and text based on contract status: sent, signed, expired, or no active contract
 
 \- Shows quick actions card:
 
@@ -458,7 +462,9 @@ Current status:
 
 Current limitation:
 
-\- Some data now comes from mock data
+\- Parent and child names come from mock data
+
+\- Contract reminder content comes from mockContracts
 
 \- Some text is still hardcoded placeholder data
 
@@ -718,7 +724,7 @@ Parent home currently includes:
 
 \- Daily summary card
 
-\- Contract reminder card
+\- Contract reminder card connected to mockContracts
 
 \- Quick actions card
 
