@@ -456,13 +456,11 @@ Current status:
 
 \- Shows quick actions card rendered from a local parentQuickActions array in app/app/parent/home.tsx:
 
-&#x20; - סיכום יום
+&#x20; - סיכום יום - navigates to /parent/daily-summary
 
-&#x20; - חוזים ומסמכים
+&#x20; - חוזים ומסמכים - navigation not connected yet
 
-&#x20; - יצירת קשר עם הגן
-
-&#x20; - Navigation for these actions has not been implemented yet
+&#x20; - יצירת קשר עם הגן - navigation not connected yet
 
 \- Uses BottomNavBar
 
@@ -528,7 +526,7 @@ Current limitation:
 
 \- No parent-specific filtering exists yet
 
-\- Navigation from Parent Home quick action to this screen has not been connected yet
+\- Navigation from Parent Home is connected through the "סיכום יום" quick action
 
 \- No real backend data exists yet
 
@@ -810,7 +808,19 @@ Parent daily summary screen:
 
 \- Uses AppScreen, AppCard, BottomNavBar (activeItem="daily"), Colors, Spacing
 
-\- Navigation from Parent Home to this screen is not connected yet
+\- Navigation from Parent Home "סיכום יום" quick action is now connected
+
+\- TypeScript passes with no errors
+
+\- The change was committed and pushed to GitHub
+
+
+
+Parent Home navigation update:
+
+\- "סיכום יום" quick action in Parent Home now navigates to app/app/parent/daily-summary.tsx
+
+\- "חוזים ומסמכים" and "יצירת קשר עם הגן" quick actions are still not connected yet
 
 \- TypeScript passes with no errors
 
