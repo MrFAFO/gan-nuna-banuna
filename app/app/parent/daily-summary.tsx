@@ -11,6 +11,7 @@ import {
   mockDailyNotes,
   mockDailyReportSummary,
 } from "../../src/data/mockDailyReports";
+import { useBottomNavPress } from "../../src/navigation/useBottomNavPress";
 import { Colors } from "../../src/theme/colors";
 import { Spacing } from "../../src/theme/spacing";
 
@@ -36,6 +37,8 @@ const NOTE_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function DailySummaryScreen() {
+  const handleBottomNavPress = useBottomNavPress("parent");
+
   return (
     <View style={styles.root}>
       <AppScreen scrollable>
@@ -176,7 +179,11 @@ export default function DailySummaryScreen() {
         </View>
       </AppScreen>
 
-      <BottomNavBar activeItem="daily" variant="parent" />
+      <BottomNavBar
+        activeItem="daily"
+        variant="parent"
+        onItemPress={handleBottomNavPress}
+      />
     </View>
   );
 }

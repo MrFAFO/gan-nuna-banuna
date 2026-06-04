@@ -39,13 +39,22 @@ app/
     parent/
       home.tsx
       daily-summary.tsx
+      absence-report.tsx
+      contract-renewal.tsx
     teacher/
       home.tsx
+      children.tsx
+      add-child.tsx
+      attendance.tsx
+      daily-report.tsx
+      contracts.tsx
+      upload-contract.tsx
   src/
     components/
     config/
       client.config.ts
     data/
+    navigation/
     theme/
     types/
 ```
@@ -74,11 +83,13 @@ Reusable UI components:
 - `app/src/components/AppTextInput.tsx`
 - `app/src/components/StatusBadge.tsx`
 - `app/src/components/BottomNavBar.tsx`
+- `app/src/navigation/useBottomNavPress.ts`
 
 Current component notes:
 
 - `StatusBadge` supports attendance statuses and all current contract statuses.
 - `BottomNavBar` supports separate parent and teacher variants.
+- `useBottomNavPress` centralizes bottom navigation routes for parent and teacher screens.
 
 ## Existing Data
 
@@ -124,8 +135,10 @@ Status:
 - Shows daily summary counts from `mockDailyReportSummary`.
 - Shows contract reminder from `mockContracts`.
 - "סיכום יום" navigates to `/parent/daily-summary`.
-- "חוזים ומסמכים" and "יצירת קשר עם הגן" are placeholders until their flows exist.
-- Uses `BottomNavBar` with the parent variant.
+- "דיווח מהיר לגננת" navigates to `/parent/absence-report`.
+- "חוזים ומסמכים" navigates to `/parent/contract-renewal`.
+- "יצירת קשר עם הגן" is still a placeholder until contact behavior is decided.
+- Uses `BottomNavBar` with the parent variant and shared bottom-nav routing.
 
 ### Parent Daily Summary
 
@@ -136,8 +149,35 @@ File:
 Status:
 
 - Shows summary counts, activities, meals, messages, and notes from `mockDailyReports`.
-- Uses `BottomNavBar` with the parent variant.
+- Uses `BottomNavBar` with the parent variant and shared bottom-nav routing.
 - No parent-specific filtering yet.
+
+### Parent Absence / Quick Report
+
+File:
+
+- `app/app/parent/absence-report.tsx`
+
+Status:
+
+- Added as a soft "דיווח מהיר לגננת" flow.
+- Lets the parent choose absence / late arrival / early pickup / request callback.
+- Shows child and date from mock data.
+- Uses local mock behavior only; no real message is sent.
+- Keeps the product direction that personal communication with the daycare is still important.
+
+### Parent Contract Renewal
+
+File:
+
+- `app/app/parent/contract-renewal.tsx`
+
+Status:
+
+- Shows the parent's pending contract from `mockContracts`.
+- Shows child summary, contract status, details, document card, and signature action card.
+- PDF preview and digital signature are placeholder alerts only.
+- Uses `CLIENT_CONFIG` for daycare branding.
 
 ### Teacher Home
 
@@ -151,36 +191,96 @@ Status:
 - Shows daycare name from `CLIENT_CONFIG.daycareName`.
 - Shows child count from `mockChildren`.
 - Shows present count from `mockDailyReportSummary`.
-- Quick actions are still placeholders until the teacher screens exist.
-- Uses `BottomNavBar` with the teacher variant.
+- Quick actions navigate to teacher children, attendance, daily report, and contracts.
+- Uses `BottomNavBar` with the teacher variant and shared bottom-nav routing.
+
+### Teacher Children
+
+File:
+
+- `app/app/teacher/children.tsx`
+
+Status:
+
+- Shows mock children list with local search.
+- Shows attendance and contract status badges.
+- Shows summary counts and empty search state.
+- Navigates to `/teacher/add-child`.
+
+### Teacher Add Child
+
+File:
+
+- `app/app/teacher/add-child.tsx`
+
+Status:
+
+- Form screen with child details, parent/guardian details, notes, and simple local validation.
+- Image upload and save are mock behavior only.
+- Returns to the children list after the success alert.
+
+### Teacher Attendance
+
+File:
+
+- `app/app/teacher/attendance.tsx`
+
+Status:
+
+- Shows children from `mockChildren`.
+- Allows local status selection for arrived / not arrived / late / left early.
+- Summary card updates locally.
+- Save action shows a mock success alert.
+
+### Teacher Daily Report
+
+File:
+
+- `app/app/teacher/daily-report.tsx`
+
+Status:
+
+- Shows daily summary counts, activities, meals, messages, and notes from `mockDailyReports`.
+- Add activity, add note, and view messages are placeholders for future flows.
+
+### Teacher Contracts
+
+File:
+
+- `app/app/teacher/contracts.tsx`
+
+Status:
+
+- Shows contract summary, local search, and contract list from `mockContracts`.
+- Uses `StatusBadge` for contract status.
+- Navigates to `/teacher/upload-contract`.
+
+### Teacher Upload Contract
+
+File:
+
+- `app/app/teacher/upload-contract.tsx`
+
+Status:
+
+- Shows first step of the upload contract flow.
+- Includes contract details, contract type chips, PDF placeholder, security notice, and validation.
+- No real PDF upload, storage, email, or signing provider integration yet.
 
 ## Remaining MVP Screens
 
-Still missing:
-
-- `app/app/teacher/children.tsx`
-- `app/app/teacher/add-child.tsx`
-- `app/app/teacher/attendance.tsx`
-- `app/app/teacher/daily-report.tsx`
-- `app/app/teacher/contracts.tsx`
-- `app/app/teacher/upload-contract.tsx`
-- `app/app/parent/absence-report.tsx`
-- `app/app/parent/contract-renewal.tsx`
+All planned frontend MVP screens from the current implementation plan now exist with mock data.
 
 ## Current Next Steps
 
 Recommended order:
 
-1. Run `npm install` inside `app/` if dependencies are missing.
-2. Run `npm run typecheck`.
-3. Build teacher children list.
-4. Build teacher add-child form.
-5. Build teacher attendance.
-6. Build teacher daily report.
-7. Build parent absence report.
-8. Build teacher contracts and upload-contract.
-9. Build parent contract-renewal.
-10. Replace mock data with backend services in a later phase.
+1. Run `npm run typecheck`.
+2. Run `npm run lint`.
+3. Review MVP screens visually on web/mobile.
+4. Fix spacing/RTL issues found during visual QA.
+5. Decide contact behavior for "יצירת קשר עם הגן".
+6. Later replace mock data with backend services.
 
 ## Production Readiness Notes
 

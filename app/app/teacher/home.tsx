@@ -1,15 +1,27 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
+import type { Href } from "expo-router";
 import { AppScreen } from "../../src/components/AppScreen";
 import { AppCard } from "../../src/components/AppCard";
 import { BottomNavBar } from "../../src/components/BottomNavBar";
 import { CLIENT_CONFIG } from "../../src/config/client.config";
 import { mockChildren } from "../../src/data/mockChildren";
 import { mockDailyReportSummary } from "../../src/data/mockDailyReports";
+import { useBottomNavPress } from "../../src/navigation/useBottomNavPress";
 import { Colors } from "../../src/theme/colors";
 import { Spacing } from "../../src/theme/spacing";
 
+const teacherQuickActions: { id: string; label: string; route: Href }[] = [
+  { id: "children", label: "ילדים", route: "/teacher/children" },
+  { id: "attendance", label: "נוכחות", route: "/teacher/attendance" },
+  { id: "daily-report", label: "סיכום יום", route: "/teacher/daily-report" },
+  { id: "contracts", label: "חוזים", route: "/teacher/contracts" },
+];
+
 export default function TeacherHomeScreen() {
+  const router = useRouter();
+  const handleBottomNavPress = useBottomNavPress("teacher");
   const ownerName = CLIENT_CONFIG.ownerName || CLIENT_CONFIG.daycareName;
 
   return (
@@ -31,18 +43,16 @@ export default function TeacherHomeScreen() {
           <AppCard style={styles.actionsCard}>
             <Text style={styles.actionsTitle}>פעולות מהירות</Text>
             <View style={styles.actionsGrid}>
-              <View style={styles.actionItem}>
-                <Text style={styles.actionText}>ילדים</Text>
-              </View>
-              <View style={styles.actionItem}>
-                <Text style={styles.actionText}>נוכחות</Text>
-              </View>
-              <View style={styles.actionItem}>
-                <Text style={styles.actionText}>סיכום יום</Text>
-              </View>
-              <View style={styles.actionItem}>
-                <Text style={styles.actionText}>חוזים</Text>
-              </View>
+              {teacherQuickActions.map((action) => (
+                <TouchableOpacity
+                  key={action.id}
+                  activeOpacity={0.75}
+                  onPress={() => router.push(action.route)}
+                  style={styles.actionItem}
+                >
+                  <Text style={styles.actionText}>{action.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </AppCard>
           <AppCard style={styles.card}>
@@ -51,7 +61,11 @@ export default function TeacherHomeScreen() {
           </AppCard>
         </View>
       </AppScreen>
-      <BottomNavBar activeItem="home" variant="teacher" />
+      <BottomNavBar
+        activeItem="home"
+        variant="teacher"
+        onItemPress={handleBottomNavPress}
+      />
     </View>
   );
 }

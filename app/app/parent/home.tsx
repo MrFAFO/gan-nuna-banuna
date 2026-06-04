@@ -12,15 +12,18 @@ import { mockParent, mockParentChildId } from "../../src/data/mockParent";
 import { mockChildren } from "../../src/data/mockChildren";
 import { mockContracts } from "../../src/data/mockContracts";
 import { mockDailyReportSummary } from "../../src/data/mockDailyReports";
+import { useBottomNavPress } from "../../src/navigation/useBottomNavPress";
 
 const parentQuickActions: { id: string; label: string; route?: Href }[] = [
   { id: "daily-summary", label: "סיכום יום", route: "/parent/daily-summary" },
-  { id: "contracts", label: "חוזים ומסמכים" },
+  { id: "absence", label: "דיווח מהיר לגננת", route: "/parent/absence-report" },
+  { id: "contracts", label: "חוזים ומסמכים", route: "/parent/contract-renewal" },
   { id: "contact", label: "יצירת קשר עם הגן" },
 ];
 
 export default function ParentHomeScreen() {
   const router = useRouter();
+  const handleBottomNavPress = useBottomNavPress("parent");
   const parentChild = mockChildren.find((child) => child.id === mockParentChildId);
   const parentContract = mockContracts.find((contract) => contract.childId === parentChild?.id);
 
@@ -89,7 +92,11 @@ export default function ParentHomeScreen() {
         </View>
       </AppScreen>
 
-      <BottomNavBar activeItem="home" variant="parent" />
+      <BottomNavBar
+        activeItem="home"
+        variant="parent"
+        onItemPress={handleBottomNavPress}
+      />
     </View>
   );
 }
