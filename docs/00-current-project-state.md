@@ -1,844 +1,447 @@
-\# Current Project State - Gan Nuna Banuna
+# Current Project State - Gan Nuna Banuna
+
+## Purpose
+
+This file tracks the real implementation state of the project. Use it together with the product, UX, UI, and screen-specific documents under `docs/`.
+
+## Product State
+
+Gan Nuna Banuna is the first white-label mobile app for private kindergartens and home daycares.
+
+Current phase: **production pilot** (single daycare — נונה בנונה). Supabase-backed flows are implemented; app store submission is intentionally deferred until full QA passes.
+
+The app connects to real Supabase when `app/.env` is configured. Mock/demo login remains available only when Supabase is not configured and `EXPO_PUBLIC_ENABLE_DEMO_LOGIN=true`.
+
+## Tech Stack
+
+- Expo
+- React Native
+- TypeScript
+- Expo Router
+- Supabase JS client
+
+Backend direction:
+
+- Supabase Auth
+- Supabase Database
+- Supabase Storage
+- Role-based access
+- External digital-signature provider for contracts
+
+## Current App Structure
+
+Important files and folders:
+
+```text
+app/
+  app/
+    _layout.tsx
+    index.tsx
+    calendar.tsx
+    profile.tsx
+    settings.tsx
+    notifications.tsx
+    messages/
+      index.tsx
+      [id].tsx
+    parent/
+      home.tsx
+      daily-summary.tsx
+      absence-report.tsx
+      contract-renewal.tsx
+      contact.tsx
+      gallery.tsx
+      child.tsx
+    teacher/
+      home.tsx
+      children.tsx
+      add-child.tsx
+      attendance.tsx
+      daily-report.tsx
+      add-activity.tsx
+      add-note.tsx
+      contracts.tsx
+      upload-contract.tsx
+      child/
+        [id].tsx
+  src/
+    components/
+    config/
+      client.config.ts
+    data/
+    lib/
+    navigation/
+    services/
+    theme/
+    types/
+    utils/
+supabase/
+  migrations/
+```
+
+The previous Expo template routes under `(tabs)` and `modal` were removed. The app entry screen is now `app/app/index.tsx`.
+
+## White-Label Configuration
+
+White-label data lives in:
+
+- `app/src/config/client.config.ts`
+
+Current rule:
+
+- Screens must read client-specific branding from `CLIENT_CONFIG`.
+- Screens should not hardcode the daycare name, owner name, or brand colors.
+- `app/src/theme/colors.ts` reads brand colors from `CLIENT_CONFIG` and remains the style API used by components.
+
+## Existing Components
+
+Reusable UI components:
+
+- `app/src/components/AppScreen.tsx`
+- `app/src/components/AppCard.tsx`
+- `app/src/components/AppButton.tsx`
+- `app/src/components/AppTextInput.tsx`
+- `app/src/components/AppStateCard.tsx`
+- `app/src/components/AppHeader.tsx`
+- `app/src/components/HeroBanner.tsx`
+- `app/src/components/StatusBadge.tsx`
+- `app/src/components/BottomNavBar.tsx`
+- `app/src/components/ChildProfile.tsx`
+- `app/src/navigation/useBottomNavPress.ts`
 
+Current component notes:
 
+- `StatusBadge` supports attendance statuses and all current contract statuses.
+- `BottomNavBar` supports separate parent and teacher variants and renders real `@expo/vector-icons` (Ionicons).
+- `useBottomNavPress` centralizes bottom navigation routes for parent and teacher screens, including the shared `calendar`, `profile`, and `settings` destinations.
+- `ChildProfile` renders the full child card (avatar, status badges, details, guardians with quick-call) and is shared by the parent child screen and the teacher child screen.
+- `AppHeader` renders the top menu/back button plus the notification bell with a badge, used as an overlay on top of `HeroBanner`.
+- `HeroBanner` renders a full-width hero illustration with optional title/subtitle and overlay children, sourced from `app/src/theme/heroes.ts`.
 
-\## Purpose of This File
+## Hero Assets
 
+Reference hero illustrations are mapped in `app/src/theme/heroes.ts` and stored under `app/assets/heroes/`:
 
+- `login.png`, `parent-home.png`, `teacher-home.png`, `children.png`, `attendance.png`, `daily-summary.png`, `teacher-contracts.png`, `upload-contract.png`, `parent-contract.png`.
+- These files are currently temporary placeholders (a copy of the app icon) so the bundle builds. They must be replaced with the cropped hero regions from `assets/design-references/` (same file names) for full visual fidelity.
 
-This file documents the current real state of the project.
+## Existing Data
 
+Mock data lives under:
 
+- `app/src/data/mockChildren.ts`
+- `app/src/data/mockContracts.ts`
+- `app/src/data/mockDailyReports.ts`
+- `app/src/data/mockParent.ts`
+- `app/src/data/mockParentHome.ts`
+- `app/src/data/mockNotifications.ts`
+- `app/src/data/mockMessages.ts`
+- `app/src/data/mockCalendar.ts`
 
-It is not a replacement for the product specification files.
+Screen data access now goes through services under:
 
-It is a recovery file that allows the project context to be restored if the chat memory is lost or if a new developer joins the project.
+- `app/src/services/auth.service.ts`
+- `app/src/services/children.service.ts`
+- `app/src/services/contracts.service.ts`
+- `app/src/services/dailyReports.service.ts`
+- `app/src/services/attendance.service.ts`
+- `app/src/services/gallery.service.ts`
+- `app/src/services/absence.service.ts`
+- `app/src/services/contact.service.ts`
+- `app/src/services/push.service.ts`
+- `app/src/services/invite.service.ts`
+- `app/src/services/parentHome.service.ts`
+- `app/src/services/pilot.service.ts`
+- `app/src/services/notifications.service.ts`
+- `app/src/services/messages.service.ts`
+- `app/src/services/calendar.service.ts`
 
+Supabase setup files:
 
+- `app/src/lib/supabase.ts`
+- `app/.env.example`
+- `supabase/migrations/0001_pilot_foundation.sql` through `0006_storage_contracts.sql`
+- `supabase/functions/invite-parent/`
+- `supabase/functions/send-push-notification/`
 
-Use this file together with the existing documentation under docs/ and docs/ui-screens/.
+Shared types live under:
 
+- `app/src/types/child.ts`
+- `app/src/types/contract.ts`
+- `app/src/types/user.ts`
 
+## Existing Screens
 
-\## Product Overview
+### Login / Entry
 
+File: `app/app/index.tsx`
 
+Status:
 
-Gan Nuna Banuna is the first white-label version of a mobile application for private kindergartens and home daycares.
+- Email/password login via Supabase Auth when configured.
+- Forgot password sends reset email with deep link to `app/app/reset-password.tsx`.
+- Demo role buttons only when Supabase is not configured.
 
+### Parent Home
 
+File: `app/app/parent/home.tsx`
 
-The long-term product goal is to support:
+Status:
 
-\- Parent experience
+- Wired to Supabase via services (child, contract, activities, stats, photos, messages).
+- Child picker when parent has multiple linked children (persisted in AsyncStorage).
+- Quick actions: contact, contracts, calendar, profile.
 
-\- Teacher / kindergarten staff experience
+### Teacher flows (high level)
 
-\- Daily updates
+- **Add child** (`add-child.tsx`): persists to DB; invites parent by email via `invite-parent` edge function.
+- **Gallery** (`teacher/gallery.tsx`): upload photos with `expo-image-picker`.
+- **Contact inbox** (`teacher/contact-messages.tsx`): reads `contact_messages`.
+- **Absence reports** (`teacher/absence-reports.tsx`): reads `absence_reports`.
+- **Children list**: shows guardian link status (מחובר / מוזמן).
 
-\- Attendance management
+### Messaging
 
-\- Child profiles
+- Broadcast + direct threads; sender avatars; Supabase Realtime subscription in chat (requires Replication enabled in Dashboard).
 
-\- Contract renewal workflow
+### Not yet / manual
 
-\- Future digital signing integration
+- App Store / Play Store submission (deferred — see `docs/11-release-readiness.md`).
+- Hero images are still placeholders under `app/assets/heroes/`.
+- Activity catalog images: manual upload via Dashboard (documented in `12-supabase-setup.md`).
+- Push: client ready; requires EAS project ID + deployed edge function + webhook + dev build to test.
 
-\- White-label customization per kindergarten
+## Legacy screen notes (may be partially outdated below)
 
-
-
-The product should be developed with production-quality architecture in mind, even during the MVP stage.
-
-
-
-\## Existing Documentation Structure
-
-
-
-The project already contains structured documentation.
-
-
-
-Main documentation files:
-
-
-
-\- docs/01-product-overview.md
-
-\- docs/02-mvp-spec.md
-
-\- docs/03-ux-flow.md
-
-\- docs/04-screen-specs.md
-
-\- docs/05-ui-direction.md
-
-\- docs/06-technical-plan.md
-
-\- docs/07-ai-agent-prompts.md
-
-\- docs/08-decisions-log.md
-
-\- docs/09-ui-assets-and-screens.md
-
-
-
-Screen-specific documentation:
-
-
-
-\- docs/ui-screens/00-bottom-navigation.md
-
-\- docs/ui-screens/01-login-screen.md
-
-\- docs/ui-screens/02-teacher-home.md
-
-\- docs/ui-screens/03-children-list.md
-
-\- docs/ui-screens/04-attendance.md
-
-\- docs/ui-screens/05-daily-report.md
-
-\- docs/ui-screens/06-teacher-contracts.md
-
-\- docs/ui-screens/07-upload-contract.md
-
-\- docs/ui-screens/08-parent-home.md
-
-\- docs/ui-screens/09-absence-report.md
-
-\- docs/ui-screens/10-parent-contract-renewal.md
-
-\- docs/ui-screens/11-add-child.md
-
-
-
-This file should only track the current implementation state and working rules.
-
-
-
-\## Current Development Phase
-
-
-
-The project is currently in the frontend MVP stage.
-
-
-
-Current focus:
-
-\- Build the Expo React Native app structure
-
-\- Create reusable UI components
-
-\- Build initial parent and teacher screens
-
-\- Use placeholder/mock data first
-
-\- Replace placeholder/mock data with real backend data later
-
-
-
-The product is not production-ready yet.
-
-
-
-\## Tech Stack
-
-
-
-Current stack:
-
-\- React Native
-
-\- Expo
-
-\- TypeScript
-
-\- Expo Router
-
-\- Git
-
-\- GitHub
-
-
-
-Expected future backend direction:
-
-\- Supabase or another backend service
-
-\- Authentication
-
-\- Database
-
-\- Storage
-
-\- Role-based access
-
-\- Contract status management
-
-
-
-\## Local Project Path
-
-
-
-Project root:
-
-
-
-&#x20;   C:\\Users\\user\\Desktop\\gan-nuna-banuna
-
-
-
-App folder:
-
-
-
-&#x20;   C:\\Users\\user\\Desktop\\gan-nuna-banuna\\app
-
-
-
-\## GitHub
-
-
-
-The project is connected to GitHub.
-
-
-
-Remote repository:
-
-
-
-&#x20;   https://github.com/MrFAFO/gan-nuna-banuna.git
-
-
-
-Current branch:
-
-
-
-&#x20;   master
-
-
-
-Working rule:
-
-
-
-&#x20;   Make change -> test -> commit -> push -> update documentation when needed
-
-
-
-\## Important Commands
-
-
-
-Run TypeScript check:
-
-
-
-&#x20;   cd C:\\Users\\user\\Desktop\\gan-nuna-banuna\\app
-
-&#x20;   npx.cmd tsc --noEmit
-
-
-
-Run the app on web:
-
-
-
-&#x20;   cd C:\\Users\\user\\Desktop\\gan-nuna-banuna\\app
-
-&#x20;   npm.cmd run web
-
-
-
-Check Git status:
-
-
-
-&#x20;   cd C:\\Users\\user\\Desktop\\gan-nuna-banuna
-
-&#x20;   git status
-
-
-
-Commit and push:
-
-
-
-&#x20;   git add .
-
-&#x20;   git commit -m "Describe the change"
-
-&#x20;   git push
-
-
-
-\## Current Folder Structure
-
-
-
-Important folders:
-
-
-
-&#x20;   app/
-
-&#x20;     app/
-
-&#x20;       (tabs)/
-
-&#x20;         index.tsx
-
-&#x20;       parent/
-
-&#x20;         home.tsx
-
-&#x20;       teacher/
-
-&#x20;         home.tsx
-
-
-
-&#x20;     src/
-
-&#x20;       components/
-
-&#x20;       data/
-
-&#x20;       theme/
-
-
-
-\## Existing Core Components
-
-
-
-Reusable UI components already created:
-
-
-
-\- app/src/components/AppScreen.tsx
-
-\- app/src/components/AppCard.tsx
-
-\- app/src/components/AppButton.tsx
-
-\- app/src/components/AppTextInput.tsx
-
-\- app/src/components/StatusBadge.tsx
-
-\- app/src/components/BottomNavBar.tsx
-
-
-
-\## Existing Theme Files
-
-
-
-Theme files:
-
-
-
-\- app/src/theme/colors.ts
-
-\- app/src/theme/spacing.ts
-
-
-
-Main design direction:
-
-\- Warm
-
-\- Homey
-
-\- Soft
-
-\- Kindergarten-friendly
-
-\- Professional enough for production
-
-\- Not too technical-looking
-
-
-
-Main colors:
-
-\- Primary sage green: #7A9A72
-
-\- Secondary peach: #F4D6C6
-
-\- Warm cream background: #FFF8F1
-
-\- Main text: #26382E
-
-\- Secondary text: #6B6B6B
-
-
-
-\## Existing Screens
-
-
-
-\### Login / Entry Screen
-
-
+### Parent Daily Summary
 
 File:
 
+- `app/app/parent/daily-summary.tsx`
 
+Status:
 
-&#x20;   app/app/(tabs)/index.tsx
+- Shows summary counts, activities, meals, messages, and notes through `dailyReports.service`.
+- Uses `BottomNavBar` with the parent variant and shared bottom-nav routing.
+- No parent-specific filtering yet.
 
-
-
-Current purpose:
-
-\- Initial app entry screen
-
-\- Allows navigation to parent home
-
-\- Allows navigation to teacher home
-
-
-
-Current status:
-
-\- Works
-
-\- Uses placeholder flow
-
-\- Authentication is not implemented yet
-
-
-
-\### Parent Home Screen
-
-
+### Parent Absence / Quick Report
 
 File:
 
+- `app/app/parent/absence-report.tsx`
 
+Status:
 
-&#x20;   app/app/parent/home.tsx
+- Added as a soft "דיווח מהיר לגננת" flow.
+- Lets the parent choose absence / late arrival / early pickup / request callback.
+- Shows child and date through the service layer.
+- Uses local mock behavior only; no real message is sent.
+- Keeps the product direction that personal communication with the daycare is still important.
 
-
-
-Current status:
-
-\- Works
-
-\- Shows greeting using mockParent.name
-
-\- Shows child info:
-
-&#x20; - Child name from mockChildren with mockParentChildId
-
-&#x20; - Kindergarten subtitle is still hardcoded for now
-
-\- Shows daily summary card connected to mockDailyReportSummary from app/src/data/mockDailyReports.ts:
-
-&#x20; - Activity count from mock data
-
-&#x20; - Meal count from mock data
-
-&#x20; - Message count from mock data
-
-\- Shows contract reminder card using mockContracts:
-
-&#x20; - Contract matched by parentChild.id
-
-&#x20; - Title and text based on contract status: sent, signed, expired, or no active contract
-
-\- Shows quick actions card rendered from a local parentQuickActions array in app/app/parent/home.tsx:
-
-&#x20; - סיכום יום - navigates to /parent/daily-summary
-
-&#x20; - חוזים ומסמכים - navigation not connected yet
-
-&#x20; - יצירת קשר עם הגן - navigation not connected yet
-
-\- Uses BottomNavBar
-
-
-
-Current limitation:
-
-\- Parent and child names come from mock data
-
-\- Daily summary counts come from mockDailyReportSummary in mockDailyReports.ts
-
-\- Contract reminder content comes from mockContracts
-
-\- Some text is still hardcoded placeholder data
-
-\- No real backend data exists yet
-
-\- Later this data should come from authenticated parent, child profile, daily report data, and contract status data
-
-
-
-\### Parent Daily Summary Screen
-
-
+### Parent Contract Renewal
 
 File:
 
+- `app/app/parent/contract-renewal.tsx`
 
+Status:
 
-&#x20;   app/app/parent/daily-summary.tsx
+- Shows the parent's pending contract through `contracts.service`.
+- Shows child summary, contract status, details, document card, and signature action card.
+- PDF preview and digital signature are placeholder alerts only.
+- Uses `CLIENT_CONFIG` for daycare branding.
 
-
-
-Current status:
-
-\- Added
-
-\- Shows summary counts from mockDailyReportSummary:
-
-&#x20; - Present children count
-
-&#x20; - Activities count
-
-&#x20; - Meals count
-
-&#x20; - Messages count
-
-\- Shows activities list from mockDailyActivities
-
-\- Shows meals list from mockDailyMeals
-
-\- Shows messages list from mockDailyMessages (unread messages highlighted)
-
-\- Shows notes list from mockDailyNotes
-
-\- Uses BottomNavBar with activeItem="daily"
-
-
-
-Current limitation:
-
-\- All data comes from mock data in app/src/data/mockDailyReports.ts
-
-\- No parent-specific filtering exists yet
-
-\- Navigation from Parent Home is connected through the "סיכום יום" quick action
-
-\- No real backend data exists yet
-
-\- Later data should come from authenticated parent and child profile data
-
-
-
-\### Teacher Home Screen
-
-
+### Teacher Home
 
 File:
 
+- `app/app/teacher/home.tsx`
 
+Status:
 
-&#x20;   app/app/teacher/home.tsx
+- Shows greeting from `CLIENT_CONFIG.ownerName`.
+- Shows daycare name from `CLIENT_CONFIG.daycareName`.
+- Shows child count, daily summary and contract reminder through services.
+- Quick actions navigate to teacher children, attendance, daily report, contracts and upload contract.
+- Uses `BottomNavBar` with the teacher variant and shared bottom-nav routing.
 
+### Teacher Children
 
+File:
 
-Current status:
+- `app/app/teacher/children.tsx`
 
-\- Works
+Status:
 
-\- Shows teacher greeting
+- Shows children list through `children.service` with local search.
+- Shows attendance and contract status badges.
+- Shows summary counts and empty search state.
+- Each child row navigates to `/teacher/child/[id]`.
+- Navigates to `/teacher/add-child`.
 
-\- Shows basic statistics
+### Teacher Add Child
 
-\- Shows quick actions
+File:
 
-\- Shows today overview
+- `app/app/teacher/add-child.tsx`
 
-\- Uses BottomNavBar
+Status:
 
+- Form screen with child details, parent/guardian details, notes, phone validation and optional email validation.
+- Image upload and save are mock behavior only.
+- Returns to the children list after the success alert.
 
+### Teacher Attendance
 
-Current limitation:
+File:
 
-\- Text and numbers are hardcoded placeholder data
+- `app/app/teacher/attendance.tsx`
 
-\- Later this data should come from real kindergarten data and attendance records
+Status:
 
+- Shows children through `children.service`.
+- Allows local status selection for arrived / not arrived / late / left early.
+- Summary card updates locally.
+- Save action shows a mock success alert.
 
+### Teacher Daily Report
 
-\## Existing Mock Data
+File:
 
+- `app/app/teacher/daily-report.tsx`
 
+Status:
 
-Mock data exists under:
+- Shows daily summary counts, activities, meals, messages, and notes through `dailyReports.service`.
+- "הוספת פעילות" navigates to `/teacher/add-activity`, "הוספת הערה" to `/teacher/add-note`, and "צפייה בכל ההודעות" to `/messages`.
 
+### Teacher Contracts
 
+File:
 
-&#x20;   app/src/data/
+- `app/app/teacher/contracts.tsx`
 
+Status:
 
+- Shows contract summary, local search, and contract list through `contracts.service`.
+- Uses `StatusBadge` for contract status.
+- Each contract row navigates to `/teacher/child/[id]`.
+- Navigates to `/teacher/upload-contract`.
 
-Purpose:
+### Teacher Upload Contract
 
-\- Temporary local data for UI development
+File:
 
-\- Should later be replaced by service calls to backend/Supabase
+- `app/app/teacher/upload-contract.tsx`
 
+Status:
 
+- Full multi-step flow: contract details, parent/child selection, preview, and send-to-sign confirmation.
+- Includes contract type chips, PDF placeholder, step indicator, and per-step validation.
+- No real PDF upload, storage, email, or signing provider integration yet.
 
-\## Architecture Rules
+### Shared Navigation Screens
 
+Files:
 
+- `app/app/calendar.tsx`, `app/app/profile.tsx`, `app/app/settings.tsx`, `app/app/notifications.tsx`
 
-1\. Keep screens under:
+Status:
 
+- Role-aware: each reads `auth.service` to render the correct parent/teacher bottom nav variant.
+- `calendar` lists upcoming events from `calendar.service`.
+- `profile` shows the current user details plus a menu to messages, calendar, notifications, and settings.
+- `settings` has notification toggles (local state), general info rows, and a demo logout returning to the entry screen.
+- `notifications` lists items from `notifications.service` with read/unread styling; reached from the header bell on every screen.
 
+### Messages
 
-&#x20;   app/app/
+Files:
 
+- `app/app/messages/index.tsx` (thread list), `app/app/messages/[id].tsx` (conversation)
 
+Status:
 
-2\. Keep reusable components under:
+- Thread list and conversation bubbles come from `messages.service`.
+- The conversation screen has a working composer that appends messages locally (no backend send yet).
 
+### Parent Contact / Gallery / Child
 
+Files:
 
-&#x20;   app/src/components/
+- `app/app/parent/contact.tsx`, `app/app/parent/gallery.tsx`, `app/app/parent/child.tsx`
 
+Status:
 
+- `contact` offers call / WhatsApp / email quick actions (via `Linking`), contact details, and a demo message form.
+- `gallery` shows a photo grid from `parentHome.service` (placeholder tiles).
+- `child` renders the shared `ChildProfile` for the current parent's child.
 
-3\. Keep colors and spacing under:
+### Teacher Child / Add Activity / Add Note
 
+Files:
 
+- `app/app/teacher/child/[id].tsx`, `app/app/teacher/add-activity.tsx`, `app/app/teacher/add-note.tsx`
 
-&#x20;   app/src/theme/
+Status:
 
+- `child/[id]` renders the shared `ChildProfile` with quick links to daily report and contracts.
+- `add-activity` and `add-note` are demo forms (category/type chips, validation) that show a success alert and return.
 
+## Remaining MVP Screens
 
-4\. Keep temporary mock data under:
+All planned frontend MVP screens, including every bottom-nav destination and the previously "coming soon" flows, now exist with mock data. No user-facing placeholders remain.
 
+## Current Next Steps
 
+Recommended order:
 
-&#x20;   app/src/data/
+1. Replace placeholder hero images under `app/assets/heroes/` with the real cropped illustrations from `assets/design-references/`.
+2. Run `npm run typecheck`.
+3. Run `npm run lint`.
+4. Review MVP screens visually on web/mobile.
+5. Fix spacing/RTL issues found during visual QA.
+6. Configure a real Supabase project and copy values into `app/.env`.
+6. Run the migration under `supabase/migrations/0001_pilot_foundation.sql`.
+7. Replace service internals with Supabase queries while keeping screen APIs stable.
 
+## Production Readiness Notes
 
+Before production, the project still needs:
 
-5\. Do not hardcode production data long-term.
+- Real Supabase project credentials
+- Real authentication flow
+- Full screen-level Supabase query wiring
+- Full RLS policy review with real pilot users
+- Production Privacy Policy / Terms URLs
+- Final app icon, splash and store screenshots
+- Privacy and security review
+- Contract workflow design
+- External digital-signature provider integration
 
+## Verification Notes
 
+Current verification commands:
 
-6\. Build UI first, then connect mock data, then connect backend.
+- `npm run typecheck`
+- `npm run lint`
 
+Known dependency note:
 
+- `npm audit --audit-level=moderate` currently reports moderate vulnerabilities through Expo's dependency tree (`postcss`, `uuid`).
+- The available automatic fix requires `npm audit fix --force`, which would upgrade Expo to a breaking major version.
+- Do not run the forced audit fix as part of MVP screen work. Plan an Expo upgrade separately.
 
-7\. Every meaningful change should pass:
+## Working Rules
 
-
-
-&#x20;   npx.cmd tsc --noEmit
-
-
-
-8\. Every stable change should be committed and pushed to GitHub.
-
-
-
-\## Claude Code Working Rules
-
-
-
-Claude Code should be used carefully.
-
-
-
-Allowed:
-
-\- Small targeted edits
-
-\- One file at a time
-
-\- Short JSX additions
-
-\- Simple style additions
-
-\- Small refactors
-
-
-
-Avoid:
-
-\- Large full-file rewrites
-
-\- Building whole screens in one prompt
-
-\- Large Hebrew TSX edits
-
-\- Editing multiple files at once
-
-\- Allowing all edits automatically
-
-
-
-Important:
-
-\- Always inspect the diff before approving.
-
-\- Do not choose "allow all edits".
-
-\- If the diff includes malformed JSX such as >Text/<, reject it.
-
-\- If the diff changes unrelated files, reject it.
-
-\- Prefer targeted edits over full-file rewrites.
-
-
-
-\## Current Next Steps
-
-
-
-Recommended next development steps:
-
-
-
-1\. Make sure all current changes are committed and pushed.
-
-2\. Continue improving Parent Home screen.
-
-3\. Connect parent home screen to mock data.
-
-4\. Create parent contract screen.
-
-5\. Later create daily summary screen.
-
-6\. Later create attendance screens for teacher.
-
-7\. Later replace mock data with backend.
-
-
-
-\## Production Readiness Notes
-
-
-
-The app is not production-ready yet.
-
-
-
-Before production, the project will need:
-
-\- Real authentication
-
-\- Role-based permissions
-
-\- Backend/database
-
-\- Secure storage
-
-\- Error handling
-
-\- Loading states
-
-\- Empty states
-
-\- Form validation
-
-\- Environment variables
-
-\- Production build configuration
-
-\- Privacy and security review
-
-\- Contract workflow design
-
-\- External digital signature provider integration if required
-
-
-
-\## Last Known Stable State
-
-
-
-GitHub is connected.
-
-
-
-The app has working initial navigation between:
-
-\- Login / entry screen
-
-\- Parent home screen
-
-\- Teacher home screen
-
-
-
-Parent home currently includes:
-
-\- Greeting
-
-\- Child info section
-
-\- Parent and child names connected to mock data
-
-\- Daily summary card connected to mockDailyReportSummary (activity count, meal count, message count)
-
-\- Contract reminder card connected to mockContracts
-
-\- Quick actions card rendered from the local parentQuickActions array (סיכום יום, חוזים ומסמכים, יצירת קשר עם הגן)
-
-
-
-TypeScript passes with no errors.
-
-
-
-The quick actions refactor was committed and pushed to GitHub.
-
-
-
-Parent daily summary screen:
-
-\- app/app/parent/daily-summary.tsx was added
-
-\- Shows summary counts, activities, meals, messages, and notes from mock data
-
-\- Uses AppScreen, AppCard, BottomNavBar (activeItem="daily"), Colors, Spacing
-
-\- Navigation from Parent Home "סיכום יום" quick action is now connected
-
-\- TypeScript passes with no errors
-
-\- The change was committed and pushed to GitHub
-
-
-
-Parent Home navigation update:
-
-\- "סיכום יום" quick action in Parent Home now navigates to app/app/parent/daily-summary.tsx
-
-\- "חוזים ומסמכים" and "יצירת קשר עם הגן" quick actions are still not connected yet
-
-\- TypeScript passes with no errors
-
-\- The change was committed and pushed to GitHub
-
-
-
-Teacher home currently includes:
-
-\- Greeting
-
-\- Statistics
-
-\- Quick actions
-
-\- Today overview
-
-
-
-All stable work should be checked, committed, and pushed before continuing.
-
+- Keep screens under `app/app/`.
+- Keep reusable components under `app/src/components/`.
+- Keep client configuration under `app/src/config/`.
+- Keep mock data under `app/src/data/`.
+- Keep screen data access under `app/src/services/`.
+- Keep shared types under `app/src/types/`.
+- Keep theme primitives under `app/src/theme/`.
+- Build UI first, then services, then backend integration.
+- Do not introduce new hardcoded client branding in screens.
+- Do not commit unless explicitly requested.

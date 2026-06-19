@@ -1,57 +1,59 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../theme/colors";
 import { BorderRadius, Shadow, Spacing } from "../theme/spacing";
 
-type BottomNavItem = "settings" | "daily" | "home" | "calendar" | "profile";
+export type BottomNavItem =
+  | "home"
+  | "daily"
+  | "calendar"
+  | "profile"
+  | "settings";
+
+type BottomNavVariant = "parent" | "teacher";
+
+type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
 interface BottomNavBarProps {
   activeItem?: BottomNavItem;
+  variant?: BottomNavVariant;
   onItemPress?: (item: BottomNavItem) => void;
 }
 
 interface NavItemConfig {
   key: BottomNavItem;
   label: string;
-  icon: string;
+  icon: IoniconName;
 }
 
-const NAV_ITEMS: NavItemConfig[] = [
-  {
-    key: "settings",
-    label: "הגדרות",
-    icon: "⚙",
-  },
-  {
-    key: "daily",
-    label: "תיעוד יומי",
-    icon: "📷",
-  },
-  {
-    key: "home",
-    label: "בית",
-    icon: "⌂",
-  },
-  {
-    key: "calendar",
-    label: "לוח שנה",
-    icon: "□",
-  },
-  {
-    key: "profile",
-    label: "פרופיל",
-    icon: "○",
-  },
+const PARENT_NAV_ITEMS: NavItemConfig[] = [
+  { key: "settings", label: "הגדרות", icon: "settings-outline" },
+  { key: "daily", label: "תיעוד יומי", icon: "camera-outline" },
+  { key: "home", label: "בית", icon: "home" },
+  { key: "calendar", label: "לוח שנה", icon: "calendar-outline" },
+  { key: "profile", label: "פרופיל", icon: "person-outline" },
+];
+
+const TEACHER_NAV_ITEMS: NavItemConfig[] = [
+  { key: "settings", label: "הגדרות", icon: "settings-outline" },
+  { key: "daily", label: "תיעוד יומי", icon: "camera-outline" },
+  { key: "home", label: "בית", icon: "home" },
+  { key: "calendar", label: "לוח שנה", icon: "calendar-outline" },
+  { key: "profile", label: "פרופיל", icon: "person-outline" },
 ];
 
 export function BottomNavBar({
   activeItem = "home",
+  variant = "parent",
   onItemPress,
 }: BottomNavBarProps) {
+  const navItems = variant === "teacher" ? TEACHER_NAV_ITEMS : PARENT_NAV_ITEMS;
+
   return (
     <View style={styles.wrapper}>
-      {NAV_ITEMS.map((item) => {
+      {navItems.map((item) => {
         const isActive = item.key === activeItem;
         const isHome = item.key === "home";
 
@@ -69,15 +71,17 @@ export function BottomNavBar({
                 isHome ? styles.homeIconCircle : undefined,
               ]}
             >
-              <Text
-                style={[
-                  styles.iconText,
-                  isActive ? styles.activeIconText : undefined,
-                  isHome ? styles.homeIconText : undefined,
-                ]}
-              >
-                {item.icon}
-              </Text>
+              <Ionicons
+                name={item.icon}
+                size={isHome ? 26 : 22}
+                color={
+                  isHome
+                    ? Colors.white
+                    : isActive
+                      ? Colors.primary
+                      : Colors.textSecondary
+                }
+              />
             </View>
 
             <Text style={[styles.label, isActive ? styles.activeLabel : undefined]}>
@@ -127,18 +131,6 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     backgroundColor: Colors.primary,
-  },
-  iconText: {
-    fontSize: 18,
-    color: Colors.textSecondary,
-  },
-  activeIconText: {
-    color: Colors.primary,
-  },
-  homeIconText: {
-    color: Colors.white,
-    fontSize: 24,
-    fontWeight: "700",
   },
   label: {
     fontSize: 12,
