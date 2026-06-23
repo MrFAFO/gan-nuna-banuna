@@ -61,6 +61,14 @@ const parentQuickActions: {
   route?: Href;
 }[] = [
   { id: "contact", label: "צור קשר עם הגן", icon: "call-outline", route: "/parent/contact" },
+  { id: "cameras", label: "מצלמות לייב", icon: "videocam-outline", route: "/parent/cameras" as Href },
+  { id: "albums", label: "אלבומים", icon: "albums-outline", route: "/parent/albums" as Href },
+  {
+    id: "events",
+    label: "הצעות מהגן",
+    icon: "sparkles-outline",
+    route: "/parent/event-suggestions" as Href,
+  },
   {
     id: "contracts",
     label: "טפסים ומסמכים",

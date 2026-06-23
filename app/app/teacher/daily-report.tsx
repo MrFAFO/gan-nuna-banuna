@@ -8,6 +8,7 @@ import { AppHeader } from "../../src/components/AppHeader";
 import { AppScreen } from "../../src/components/AppScreen";
 import { AppStateCard } from "../../src/components/AppStateCard";
 import { BottomNavBar } from "../../src/components/BottomNavBar";
+import { GalleryCaptureButtons } from "../../src/components/GalleryCaptureButtons";
 import { HeroBanner } from "../../src/components/HeroBanner";
 import { useAsyncData } from "../../src/hooks/useAsyncData";
 import {
@@ -143,6 +144,20 @@ export default function TeacherDailyReportScreen() {
             text="נשלחו"
           />
         </View>
+
+        <SectionHeader
+          title="גלריה מהיום"
+          actionLabel="לגלריה המלאה"
+          onPress={() => router.push("/teacher/gallery")}
+        />
+        <AppCard style={styles.captureCard}>
+          <Text style={styles.captureHint}>צלמו תמונה או סרטון ישירות לגלריית ההורים</Text>
+          <GalleryCaptureButtons
+            compact
+            defaultLabel="מהיום בגן"
+            onUploaded={() => router.push("/teacher/gallery")}
+          />
+        </AppCard>
 
         <SectionHeader
           title="פעילויות מרכזיות"
@@ -402,6 +417,15 @@ const styles = StyleSheet.create({
   },
   contentCard: {
     marginBottom: Spacing.sm,
+  },
+  captureCard: {
+    marginBottom: Spacing.sm,
+    gap: Spacing.sm,
+  },
+  captureHint: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    textAlign: "right",
   },
   itemHeader: {
     flexDirection: "row-reverse",

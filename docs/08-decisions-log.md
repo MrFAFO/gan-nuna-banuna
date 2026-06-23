@@ -100,3 +100,9 @@
 - את Claude Code.
 - את Codex.
 - את המשך הפיתוח.
+
+## החלטה 13 - שידור מצלמות (פיילוט)
+
+- **שלב 1 (פיילוט):** ספק `demo` — כתובת HLS מוזנת ידנית על ידי הגננת בשדה `stream_external_id`.
+- **Edge Function:** `get-camera-stream` מחזיר URL ל-5 דקות אחרי בדיקת RLS, consent, שעות ו-`is_enabled`.
+- **המשך:** Mux / Cloudflare Stream / AWS IVS — לפי `docs/15-live-cameras-discovery.md`.
