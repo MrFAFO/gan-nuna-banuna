@@ -483,6 +483,163 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      cameras: {
+        Row: {
+          id: string;
+          daycare_id: string;
+          name: string;
+          location: string | null;
+          stream_provider: string;
+          stream_external_id: string | null;
+          is_enabled: boolean;
+          schedule_json: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          daycare_id: string;
+          name: string;
+          location?: string | null;
+          stream_provider?: string;
+          stream_external_id?: string | null;
+          is_enabled?: boolean;
+          schedule_json?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          location?: string | null;
+          stream_provider?: string;
+          stream_external_id?: string | null;
+          is_enabled?: boolean;
+          schedule_json?: Json;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      camera_consents: {
+        Row: {
+          profile_id: string;
+          daycare_id: string;
+          consented_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          daycare_id: string;
+          consented_at?: string;
+        };
+        Update: { consented_at?: string };
+        Relationships: [];
+      };
+      camera_access_logs: {
+        Row: {
+          id: string;
+          camera_id: string;
+          profile_id: string;
+          accessed_at: string;
+        };
+        Insert: {
+          id?: string;
+          camera_id: string;
+          profile_id: string;
+          accessed_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      gallery_albums: {
+        Row: {
+          id: string;
+          daycare_id: string;
+          title: string;
+          theme: string;
+          description: string | null;
+          cover_photo_id: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          daycare_id: string;
+          title: string;
+          theme: string;
+          description?: string | null;
+          cover_photo_id?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          title?: string;
+          theme?: string;
+          description?: string | null;
+          cover_photo_id?: string | null;
+        };
+        Relationships: [];
+      };
+      gallery_album_photos: {
+        Row: {
+          album_id: string;
+          photo_id: string;
+          sort_order: number;
+        };
+        Insert: {
+          album_id: string;
+          photo_id: string;
+          sort_order?: number;
+        };
+        Update: { sort_order?: number };
+        Relationships: [];
+      };
+      event_suggestions: {
+        Row: {
+          id: string;
+          daycare_id: string;
+          title: string;
+          body: string;
+          suggestion_type: string;
+          event_date: string | null;
+          requires_rsvp: boolean;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          daycare_id: string;
+          title: string;
+          body: string;
+          suggestion_type?: string;
+          event_date?: string | null;
+          requires_rsvp?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          title?: string;
+          body?: string;
+          suggestion_type?: string;
+          event_date?: string | null;
+          requires_rsvp?: boolean;
+        };
+        Relationships: [];
+      };
+      event_suggestion_responses: {
+        Row: {
+          suggestion_id: string;
+          profile_id: string;
+          attending: boolean;
+          responded_at: string;
+        };
+        Insert: {
+          suggestion_id: string;
+          profile_id: string;
+          attending: boolean;
+          responded_at?: string;
+        };
+        Update: { attending?: boolean; responded_at?: string };
+        Relationships: [];
+      };
     };
     Views: { [key in never]: never };
     Functions: {

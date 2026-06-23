@@ -14,7 +14,7 @@ npm run lint
 
 - [ ] `app/.env` is gitignored and not committed
 - [ ] EAS Secrets set: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] Migrations `0001`–`0006` applied in Supabase SQL Editor
+- [ ] Migrations `0001`–`0008` applied in Supabase SQL Editor
 - [ ] Teacher + parent auth users linked to profiles (step 5 in `12-supabase-setup.md`) — seed parent only; new parents via app invite
 - [ ] Realtime enabled on `messages` table (Database → Replication)
 - [ ] `invite-parent` edge function deployed
@@ -56,6 +56,22 @@ npm run lint
 - [ ] Absence report saves and notifies teacher
 - [ ] Contact form saves and notifies teacher
 - [ ] Gallery shows uploaded photos (or empty state)
+
+## Live cameras
+
+- [ ] `get-camera-stream` edge function deployed
+- [ ] Teacher: add HLS URL, enable camera, set viewing hours
+- [ ] Parent: consent screen → camera list → live player (dev/production build; not Expo Go for video)
+- [ ] Parent without consent gets blocked (403 from edge function)
+- [ ] Camera disabled or outside hours shows appropriate empty/error state
+- [ ] Parent cannot access another daycare's cameras (RLS)
+- [ ] See `docs/15-live-cameras-discovery.md` for hardware checklist before go-live
+
+## Albums and event suggestions
+
+- [ ] Teacher creates themed album from gallery photos → parent sees collage grid
+- [ ] Teacher sends event suggestion → parents get notification
+- [ ] Parent RSVP (if enabled) updates counts for teacher
 
 ## Cross-platform
 

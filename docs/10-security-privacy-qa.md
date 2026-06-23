@@ -6,6 +6,8 @@
 - Teacher users may access children, attendance, daily reports and contracts only within their daycare.
 - Contract PDFs must be stored in a private Supabase Storage bucket.
 - Digital signature must be handled by an external provider, not implemented inside the app.
+- **Live cameras:** parents must opt in via `camera_consents` before viewing. Stream URLs are short-lived (5 min) via `get-camera-stream` edge function. No RTSP credentials in the app or public DB columns. Viewing hours enforced server-side (`schedule_json`).
+- **Camera access** is logged in `camera_access_logs` for audit.
 
 ## Required States
 

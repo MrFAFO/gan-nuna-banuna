@@ -31,6 +31,8 @@ In the dashboard open SQL Editor > New query, then run these files in order (cop
 4. `supabase/migrations/0004_crud_catalog_messaging.sql`
 5. `supabase/migrations/0005_production_features.sql`
 6. `supabase/migrations/0006_storage_contracts.sql`
+7. `supabase/migrations/0007_live_cameras.sql`
+8. `supabase/migrations/0008_albums_event_suggestions.sql`
 
 After step 3 you have the Gan Nuna Banuna daycare, 7 children, guardians, contracts, today's attendance + daily report, a message thread, notifications, and calendar events.
 
@@ -102,6 +104,7 @@ Deploy once:
 
 ```bash
 supabase functions deploy invite-parent
+supabase functions deploy get-camera-stream
 ```
 
 Set secrets (Dashboard → Edge Functions → invite-parent → Secrets):

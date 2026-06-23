@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Linking, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
+import type { Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import { AppCard } from "../src/components/AppCard";
@@ -18,6 +19,10 @@ import {
   registerPushToken,
   unregisterPushToken,
 } from "../src/services/push.service";
+import {
+  hasCameraConsent,
+  setCameraConsent,
+} from "../src/services/cameras.service";
 import { Colors } from "../src/theme/colors";
 import { BorderRadius, Spacing } from "../src/theme/spacing";
 
@@ -35,6 +40,13 @@ export default function SettingsScreen() {
   const pilotLabel = getPilotReadinessLabel();
 
   const [pushEnabled, setPushEnabled] = useState(false);
+  const [cameraConsent, setCameraConsentState] = useState(false);
+
+  useEffect(() => {
+    if (variant === "parent") {
+      void hasCameraConsent().then(setCameraConsentState);
+    }
+  }, [variant]);
 
   useEffect(() => {
     if (profile && pushEnabled) {
@@ -59,6 +71,15 @@ export default function SettingsScreen() {
       await registerPushToken(profile.id);
     } else {
       await unregisterPushToken(profile.id);
+    }
+  }
+
+  async function handleCameraConsentToggle(next: boolean) {
+    const ok = await setCameraConsent(next);
+    if (ok) {
+      setCameraConsentState(next);
+    } else {
+      Alert.alert("שגיאה", "לא הצלחנו לעדכן את האישור.");
     }
   }
 
@@ -104,6 +125,30 @@ export default function SettingsScreen() {
             isLast
           />
         </AppCard>
+
+        {variant === "parent" ? (
+          <AppCard style={styles.card}>
+            <Text style={styles.sectionTitle}>מצלמות לייב</Text>
+            <ToggleRow
+              icon="videocam-outline"
+              label="אישור צפייה במצלמות"
+              subtitle="נדרש לפני צפייה בשידור חי מהגן"
+              value={cameraConsent}
+              onValueChange={handleCameraConsentToggle}
+              isLast
+            />
+          </AppCard>
+        ) : (
+          <AppCard style={styles.card}>
+            <Text style={styles.sectionTitle}>מצלמות</Text>
+            <LinkRow
+              icon="videocam-outline"
+              label="ניהול מצלמות לייב"
+              onPress={() => router.push("/teacher/cameras" as Href)}
+              isLast
+            />
+          </AppCard>
+        )}
 
         <AppCard style={styles.card}>
           <Text style={styles.sectionTitle}>כללי</Text>
