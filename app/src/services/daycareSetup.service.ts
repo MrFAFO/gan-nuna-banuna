@@ -33,6 +33,8 @@ export type DaycareSettingsInput = Partial<
   daycareName?: string;
 };
 
+export type UpdateDaycareSettingsResult = { ok: boolean; error?: string };
+
 type SettingsRow = Database["public"]["Tables"]["daycare_settings"]["Row"];
 type DaycareRow = Database["public"]["Tables"]["daycares"]["Row"];
 
@@ -103,10 +105,12 @@ export async function isSetupCompleted(daycareId?: string | null): Promise<boole
   return settings.setupCompleted;
 }
 
-export async function updateDaycareSettings(input: DaycareSettingsInput): Promise<boolean> {
+export async function updateDaycareSettings(
+  input: DaycareSettingsInput,
+): Promise<UpdateDaycareSettingsResult> {
   const daycareId = getCurrentDaycareId();
   if (!isSupabaseConfigured || !supabase || !daycareId) {
-    return true;
+    return { ok: true };
   }
 
   const sb = supabase;
@@ -117,7 +121,7 @@ export async function updateDaycareSettings(input: DaycareSettingsInput): Promis
       .update({ name: input.daycareName.trim() })
       .eq("id", daycareId);
     if (daycareError) {
-      return false;
+      return { ok: false, error: daycareError.message };
     }
   }
 
@@ -142,13 +146,16 @@ export async function updateDaycareSettings(input: DaycareSettingsInput): Promis
   if (input.logoUrl !== undefined) patch.logo_url = input.logoUrl;
 
   const { error } = await sb.from("daycare_settings").upsert(patch, { onConflict: "daycare_id" });
-  return !error;
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
 }
 
-export async function completeSetup(): Promise<boolean> {
+export async function completeSetup(): Promise<UpdateDaycareSettingsResult> {
   const daycareId = getCurrentDaycareId();
   if (!isSupabaseConfigured || !supabase || !daycareId) {
-    return true;
+    return { ok: true };
   }
 
   const { error } = await supabase.from("daycare_settings").upsert(
@@ -161,7 +168,10 @@ export async function completeSetup(): Promise<boolean> {
     { onConflict: "daycare_id" },
   );
 
-  return !error;
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
 }
 
 export async function getHeroImagePaths(daycareId?: string | null): Promise<Record<HeroKey, string>> {

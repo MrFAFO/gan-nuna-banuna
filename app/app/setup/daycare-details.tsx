@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 
@@ -32,14 +33,19 @@ export default function SetupDaycareDetailsScreen() {
       return;
     }
     setSaving(true);
-    const ok = await updateDaycareSettings({
+    const result = await updateDaycareSettings({
       daycareName: daycareName.trim(),
       ownerName: ownerName.trim(),
       supportPhone: supportPhone.trim() || null,
       supportEmail: supportEmail.trim() || null,
     });
     setSaving(false);
-    if (!ok) {
+    if (!result.ok) {
+      Alert.alert(
+        "לא הצלחנו לשמור",
+        result.error ??
+          "בדקו שיש לכם הרשאות admin/teacher. הריצו migration 0010 ב-Supabase אם עדיין לא.",
+      );
       return;
     }
     await refresh();

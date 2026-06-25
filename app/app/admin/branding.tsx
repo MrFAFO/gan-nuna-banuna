@@ -30,15 +30,15 @@ export default function AdminBrandingScreen() {
 
   async function handleSave() {
     setSaving(true);
-    const ok = await updateDaycareSettings({
+    const result = await updateDaycareSettings({
       tagline: tagline.trim() || null,
       subtitle: subtitle.trim() || null,
       primaryColor: primaryColor.trim() || null,
       secondaryColor: secondaryColor.trim() || null,
     });
     setSaving(false);
-    if (!ok) {
-      Alert.alert("שגיאה", "לא הצלחנו לשמור.");
+    if (!result.ok) {
+      Alert.alert("שגיאה", result.error ?? "לא הצלחנו לשמור.");
       return;
     }
     await refresh();

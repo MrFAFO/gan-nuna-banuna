@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { Alert, StyleSheet, Text } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useAuth } from "../../src/auth/AuthContext";
@@ -20,11 +20,13 @@ export default function SetupCompleteScreen() {
 
   async function handleFinish() {
     setSaving(true);
-    const ok = await completeSetup();
-    if (ok) {
+    const result = await completeSetup();
+    if (result.ok) {
       await refresh();
       await refreshProfile();
       router.replace("/teacher/home");
+    } else {
+      Alert.alert("לא הצלחנו לסיים", result.error ?? "נסו שוב.");
     }
     setSaving(false);
   }

@@ -34,6 +34,7 @@ In the dashboard open SQL Editor > New query, then run these files in order (cop
 7. `supabase/migrations/0007_live_cameras.sql`
 8. `supabase/migrations/0008_albums_event_suggestions.sql`
 9. `supabase/migrations/0009_daycare_setup.sql`
+10. `supabase/migrations/0010_daycare_setup_teacher_rls.sql`
 
 After step 3 you have the Gan Nuna Banuna daycare, 7 children, guardians, contracts, today's attendance + daily report, a message thread, notifications, and calendar events.
 

@@ -35,15 +35,15 @@ export default function AdminDaycareDetailsScreen() {
       return;
     }
     setSaving(true);
-    const ok = await updateDaycareSettings({
+    const result = await updateDaycareSettings({
       daycareName: daycareName.trim(),
       ownerName: ownerName.trim(),
       supportPhone: supportPhone.trim() || null,
       supportEmail: supportEmail.trim() || null,
     });
     setSaving(false);
-    if (!ok) {
-      Alert.alert("שגיאה", "לא הצלחנו לשמור.");
+    if (!result.ok) {
+      Alert.alert("שגיאה", result.error ?? "לא הצלחנו לשמור.");
       return;
     }
     await refresh();

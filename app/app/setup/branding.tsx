@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 
@@ -28,14 +29,15 @@ export default function SetupBrandingScreen() {
 
   async function handleNext() {
     setSaving(true);
-    const ok = await updateDaycareSettings({
+    const result = await updateDaycareSettings({
       tagline: tagline.trim() || null,
       subtitle: subtitle.trim() || null,
       primaryColor: primaryColor.trim() || null,
       secondaryColor: secondaryColor.trim() || null,
     });
     setSaving(false);
-    if (!ok) {
+    if (!result.ok) {
+      Alert.alert("לא הצלחנו לשמור", result.error ?? "נסו שוב.");
       return;
     }
     await refresh();
