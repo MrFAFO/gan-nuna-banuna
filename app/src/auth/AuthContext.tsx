@@ -92,6 +92,21 @@ async function loadProfileForUser(
     return null;
   }
 
+  if (profileRow.role === "platform_admin") {
+    return {
+      id: profileRow.id,
+      role: "platform_admin",
+      daycareId: null,
+      daycareName: null,
+      setupCompleted: true,
+      fullName: profileRow.full_name,
+      phone: profileRow.phone,
+      email,
+      parentChildId: null,
+      parentChildIds: [],
+    };
+  }
+
   let daycareName: string | null = null;
   let setupCompleted = true;
   if (profileRow.daycare_id) {

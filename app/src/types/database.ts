@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export type UserRoleDb = "parent" | "teacher" | "admin";
+export type UserRoleDb = "parent" | "teacher" | "admin" | "platform_admin";
 export type AttendanceStatusDb = "arrived" | "not_arrived" | "late" | "left_early";
 export type ContractStatusDb =
   | "draft"

@@ -12,19 +12,41 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const admin = createClient(supabaseUrl, serviceRoleKey);
+
     const provisionSecret = Deno.env.get("PROVISION_SECRET") ?? "";
     const requestSecret = req.headers.get("x-provision-secret") ?? "";
+    const authHeader = req.headers.get("authorization") ?? "";
+    const bearerToken = authHeader.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length)
+      : "";
 
-    if (!provisionSecret || requestSecret !== provisionSecret) {
+    let authorized = Boolean(provisionSecret && requestSecret === provisionSecret);
+
+    if (!authorized && bearerToken && anonKey) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: `Bearer ${bearerToken}` } },
+      });
+      const { data: userData, error: userError } = await userClient.auth.getUser();
+      if (!userError && userData.user) {
+        const { data: profileRow } = await admin
+          .from("profiles")
+          .select("role")
+          .eq("id", userData.user.id)
+          .maybeSingle();
+        authorized = profileRow?.role === "platform_admin";
+      }
+    }
+
+    if (!authorized) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const admin = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json();
     const {

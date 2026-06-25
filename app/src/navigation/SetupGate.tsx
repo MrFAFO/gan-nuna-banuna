@@ -18,16 +18,16 @@ export function SetupGate() {
       return;
     }
 
-    const isStaff = profile.role === "admin" || profile.role === "teacher";
+    const isAdmin = profile.role === "admin";
     const onSetup = pathname.startsWith(SETUP_PREFIX);
     const onPublic = PUBLIC_ROUTES.has(pathname);
 
-    if (isStaff && !profile.setupCompleted && !onSetup && !onPublic) {
+    if (isAdmin && !profile.setupCompleted && !onSetup && !onPublic) {
       router.replace("/setup/daycare-details" as Href);
       return;
     }
 
-    if (isStaff && profile.setupCompleted && onSetup) {
+    if (isAdmin && profile.setupCompleted && onSetup) {
       router.replace("/teacher/home");
     }
   }, [profile, initializing, pathname, router]);

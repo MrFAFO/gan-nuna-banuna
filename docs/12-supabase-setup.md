@@ -35,10 +35,18 @@ In the dashboard open SQL Editor > New query, then run these files in order (cop
 8. `supabase/migrations/0008_albums_event_suggestions.sql`
 9. `supabase/migrations/0009_daycare_setup.sql`
 10. `supabase/migrations/0010_daycare_setup_teacher_rls.sql`
+11. `supabase/migrations/0011_platform_admin_enum.sql` — **Run alone first** (adds enum value)
+12. `supabase/migrations/0012_platform_admin_and_clean.sql` — run immediately after 0011
+
+**Important:** PostgreSQL requires step 11 to be committed before step 12. In SQL Editor, run 0011, click Run, then run 0012 in a **new query**. Do not paste both files into one Run.
 
 After step 3 you have the Gan Nuna Banuna daycare, 7 children, guardians, contracts, today's attendance + daily report, a message thread, notifications, and calendar events.
 
-After step 9 you also have: `daycare_settings` and `daycare_hero_images` for per-gan branding, the public `daycare-branding` storage bucket, admin update policies on `daycares`, and pilot `daycare_settings` marked as setup-complete.
+After steps 11–12 the pilot seed data is **removed**: empty Nuna Banuna shell only (`setup_completed = false`), no children/parents/contracts. Run 0011+0012 on existing projects to reset to a clean state.
+
+**Optional after 0012:** In Supabase Dashboard → **Storage**, manually empty the `contracts`, `gallery`, and `daycare-branding` buckets if old pilot files remain (SQL cannot delete storage objects).
+
+After step 9 you also have: `daycare_settings` and `daycare_hero_images` for per-gan branding, the public `daycare-branding` storage bucket, admin update policies on `daycares`, and pilot `daycare_settings` (0012 resets `setup_completed` to false).
 
 After step 4 you also have: activity catalog (16 pre-seeded activities), private/broadcast messaging columns, tightened parent thread visibility, per-recipient notification read policies, and the public `activity-images` storage bucket.
 
@@ -46,47 +54,51 @@ After step 5 you also have: `gallery_photos` + public `gallery` bucket, `absence
 
 After step 6 you also have: Storage RLS policies on the private `contracts` bucket (teacher upload/read/delete; parent read for linked children). Without this migration, contract PDF upload and preview may fail silently.
 
-## 4. Create the pilot users (auth)
+## 4. Create users (auth)
 
-Go to Authentication > Users > "Add user" and create two users (email + password, mark "Auto confirm"):
+Go to Authentication > Users > "Add user" and create users (email + password, mark "Auto confirm"):
 
-- Teacher: e.g. `teacher@gan-nuna.co.il`
-- Parent: e.g. `rachel.cohen@example.com`
+- **Daycare admin** (Nuna): e.g. `teacher@gan-nuna.co.il`
+- **Platform admins** (you + Osher): your emails — no daycare linked
 
 You do NOT need to copy the User UID manually — the SQL in step 5 looks each user up by email.
 
-## 5. Link the users to profiles
+## 5. Link users to profiles
 
-A profile's `id` must equal the auth user's UID (a UUID), not the email. Instead of copying UIDs by hand (easy to mistype), let SQL resolve them from the email. In SQL Editor, run the block below — replace only the two email addresses if yours differ from step 4:
+A profile's `id` must equal the auth user's UID (a UUID), not the email. In SQL Editor, run the block below — replace email addresses as needed:
 
 ```sql
--- Teacher profile (owner)
+-- Daycare admin (Nuna) — role admin after migration 0012
 insert into public.profiles (id, daycare_id, role, full_name, phone)
 values (
   (select id from auth.users where email = 'teacher@gan-nuna.co.il'),
-  '11111111-1111-1111-1111-111111111111', 'teacher', 'נונה', null
+  '11111111-1111-1111-1111-111111111111', 'admin', 'נונה', null
 )
 on conflict (id) do update
   set daycare_id = excluded.daycare_id, role = excluded.role, full_name = excluded.full_name;
 
--- Parent profile (Rachel Cohen, mother of Noa)
+-- Platform admin (replace with your email)
 insert into public.profiles (id, daycare_id, role, full_name, phone)
 values (
-  (select id from auth.users where email = 'rachel.cohen@example.com'),
-  '11111111-1111-1111-1111-111111111111', 'parent', 'רחל כהן', '050-1234567'
+  (select id from auth.users where email = 'YOUR_EMAIL@example.com'),
+  null, 'platform_admin', 'Your Name', null
 )
 on conflict (id) do update
   set daycare_id = excluded.daycare_id, role = excluded.role, full_name = excluded.full_name;
 
--- Link the parent profile to their guardian record so RLS lets them see their child + contract
-update public.guardians
-  set profile_id = (select id from auth.users where email = 'rachel.cohen@example.com')
-  where id = 'b0000000-0000-0000-0000-000000000001';
+-- Platform admin — Osher (replace email)
+insert into public.profiles (id, daycare_id, role, full_name, phone)
+values (
+  (select id from auth.users where email = 'OSHER_EMAIL@example.com'),
+  null, 'platform_admin', 'Osher', null
+)
+on conflict (id) do update
+  set daycare_id = excluded.daycare_id, role = excluded.role, full_name = excluded.full_name;
 ```
 
 Notes:
 - The email in each `select` must exactly match the email you used in step 4, otherwise the subquery returns `NULL` and the insert fails.
-- The parent email must be identical in both the parent `insert` and the `guardians` update so the profile and guardian link to the same user.
+- After migrations 0011–0012, parent demo data is removed. New parents are added via the app (`invite-parent`).
 
 ## 6. Manual dashboard steps
 
@@ -131,15 +143,25 @@ In **Authentication → URL Configuration**, add redirect URLs:
 
 ## 7. Verify
 
-1. In the app, the entry screen now shows email/password login.
-2. Log in as the teacher: you should see the real children, attendance, daily report, and contracts.
-3. Log in as the parent: you should see only Noa, her contract, and the daycare messages/notifications/calendar.
-4. The teacher home/settings should show "מחובר לנתוני פיילוט" instead of "מצב דמו".
+1. In the app, the entry screen shows email/password login.
+2. Log in as **platform_admin** → `/platform` screen, list of gans, no children.
+3. Log in as **admin** (Nuna) → setup wizard (`setup_completed = false`), empty gan.
+4. Log in as **teacher** → daily screens only, no setup wizard or admin panel.
+5. Settings should show "מחובר לנתוני פיילוט" instead of "מצב דמו".
+
+### Role matrix
+
+| Role | Linked to gan? | Can do |
+|------|----------------|--------|
+| `platform_admin` | No | List gans, create gan (curl/secret for now), `/platform` screen |
+| `admin` | Yes | Setup wizard, `/admin` (branding, heroes, staff, kids) |
+| `teacher` | Yes | Daily work: kids, attendance, reports — no branding/setup |
+| `parent` | Yes | Parent screens only (after invite) |
 
 ## Notes
 
 - Adding a child / saving attendance / adding activities and notes / creating a contract now persist to Supabase and survive reload.
-- Row Level Security is enabled. Teachers/admins manage their daycare data; parents can only read their linked child and contracts.
+- Row Level Security is enabled. **Admin** manages branding and setup; **teacher** does daily work only; **parents** read linked child data only.
 - Contract PDF upload: the teacher upload screen now picks a real PDF and uploads it to the private `contracts` storage bucket (`<daycare_id>/<child_id>/<timestamp>-<name>.pdf`), storing the object path in `contracts.file_path`. The parent contract screen fetches a short-lived signed URL to preview it.
   - The `contracts` bucket is created automatically by migration `0001`. No public access is granted; only signed URLs are used.
   - Digital signature via an external provider remains a later stage.
@@ -168,8 +190,14 @@ supabase functions deploy invite-teacher
 Set secrets for `provision-daycare`:
 
 - `PROVISION_SECRET` — a long random string; pass it as header `x-provision-secret` on each call.
+- `SUPABASE_ANON_KEY` — required for JWT auth from logged-in `platform_admin` users.
 
-Example request (curl):
+Auth options (either works):
+
+1. **Secret header** (curl / scripts): `x-provision-secret: YOUR_PROVISION_SECRET`
+2. **JWT** (logged-in platform_admin): `Authorization: Bearer <access_token>`
+
+Example request (curl with secret):
 
 ```bash
 curl -X POST "$SUPABASE_URL/functions/v1/provision-daycare" \
@@ -194,7 +222,7 @@ The admin logs into the app (build with matching `CLIENT_CONFIG.clientId`) and i
 
 After setup, ongoing management is under **Settings → ניהול הגן** (`/admin/*`): edit branding, heroes, staff (via `invite-teacher`), children, and contracts.
 
-For the pilot user, change `role` from `teacher` to `admin` in SQL if you want to test the admin panel:
+Migration 0012 sets the pilot user role to `admin` automatically. For manual override:
 
 ```sql
 update public.profiles set role = 'admin'

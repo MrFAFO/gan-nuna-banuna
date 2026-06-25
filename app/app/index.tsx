@@ -32,11 +32,15 @@ export default function HomeScreen() {
     if (!profile) {
       return;
     }
+    if (profile.role === "platform_admin") {
+      router.replace("/platform" as Href);
+      return;
+    }
     if (profile.role === "parent") {
       router.replace("/parent/home");
       return;
     }
-    if (!profile.setupCompleted && (profile.role === "admin" || profile.role === "teacher")) {
+    if (profile.role === "admin" && !profile.setupCompleted) {
       router.replace("/setup/daycare-details" as Href);
       return;
     }
