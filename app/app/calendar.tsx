@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: "#E8DDD2",
+    borderColor: Colors.border,
   },
   typeOptionSelected: {
     backgroundColor: Colors.primary,

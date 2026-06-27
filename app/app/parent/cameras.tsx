@@ -125,7 +125,7 @@ export default function ParentCamerasScreen() {
               <Switch
                 value={consentChecked}
                 onValueChange={setConsentChecked}
-                trackColor={{ true: Colors.primary, false: "#D8D8D8" }}
+                trackColor={{ true: Colors.primary, false: Colors.borderNeutral }}
                 thumbColor={Colors.white}
               />
               <Text style={styles.consentCheckLabel}>אני מאשר/ת צפייה במצלמות הגן</Text>

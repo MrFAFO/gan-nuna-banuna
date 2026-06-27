@@ -222,7 +222,7 @@ function ToggleRow({
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        trackColor={{ true: Colors.primary, false: "#D8D8D8" }}
+        trackColor={{ true: Colors.primary, false: Colors.borderNeutral }}
         thumbColor={Colors.white}
       />
       <View style={styles.rowTextBlock}>

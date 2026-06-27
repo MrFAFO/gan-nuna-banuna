@@ -65,6 +65,9 @@ export function BottomNavBar({
             activeOpacity={0.75}
             onPress={() => onItemPress?.(item.key)}
             style={[styles.item, isHome ? styles.homeItem : undefined]}
+            accessibilityRole="button"
+            accessibilityLabel={item.label}
+            accessibilityState={{ selected: isActive }}
           >
             <View
               style={[
@@ -107,7 +110,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingTop: Spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.06)",
+    borderTopColor: Colors.divider,
     ...Shadow.elevated,
   },
   item: {

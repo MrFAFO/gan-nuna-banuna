@@ -9,7 +9,14 @@ export const Colors = {
   textSecondary: CLIENT_CONFIG.textSecondary,
   warning: CLIENT_CONFIG.warningColor,
   error: CLIENT_CONFIG.errorColor,
+  errorStrong: "#C0392B",
   white: "#FFFFFF",
+
+  // Borders, dividers & neutral surfaces
+  border: "#E8DDD2", // warm sand border (brand-aligned)
+  borderNeutral: "#D8D8D8", // neutral gray (e.g. switch track off)
+  divider: "#F0F0F0", // light divider / row separator
+  surfaceMuted: "#EFE7DD", // warm muted background tint
 
   // Attendance status
   presentBackground: "#E8F5E4",

@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     ...Typography.titleLarge,
-    color: "#FFFFFF",
+    color: Colors.white,
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,

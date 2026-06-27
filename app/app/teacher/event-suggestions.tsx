@@ -123,11 +123,11 @@ export default function TeacherEventSuggestionsScreen() {
                   ))}
                 </ScrollView>
                 <View style={styles.switchRow}>
-                  <Switch value={requiresRsvp} onValueChange={setRequiresRsvp} trackColor={{ true: Colors.primary, false: "#D8D8D8" }} thumbColor={Colors.white} />
+                  <Switch value={requiresRsvp} onValueChange={setRequiresRsvp} trackColor={{ true: Colors.primary, false: Colors.borderNeutral }} thumbColor={Colors.white} />
                   <Text style={styles.switchLabel}>דרוש אישור הגעה (RSVP)</Text>
                 </View>
                 <View style={styles.switchRow}>
-                  <Switch value={notifyParents} onValueChange={setNotifyParents} trackColor={{ true: Colors.primary, false: "#D8D8D8" }} thumbColor={Colors.white} />
+                  <Switch value={notifyParents} onValueChange={setNotifyParents} trackColor={{ true: Colors.primary, false: Colors.borderNeutral }} thumbColor={Colors.white} />
                   <Text style={styles.switchLabel}>שליחת התראה להורים</Text>
                 </View>
                 <AppButton title={saving ? "שולח..." : "שליחה"} onPress={handleCreate} disabled={saving} />

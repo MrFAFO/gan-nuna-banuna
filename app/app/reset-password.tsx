@@ -8,6 +8,7 @@ import { AppHeader } from "../src/components/AppHeader";
 import { AppScreen } from "../src/components/AppScreen";
 import { AppTextInput } from "../src/components/AppTextInput";
 import { isSupabaseConfigured, supabase } from "../src/lib/supabase";
+import { Colors } from "../src/theme/colors";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   error: {
-    color: "#C0392B",
+    color: Colors.errorStrong,
     textAlign: "right",
     fontSize: 14,
   },

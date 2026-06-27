@@ -17,6 +17,7 @@ interface AppTextInputProps {
   inputStyle?: StyleProp<TextStyle>;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
+  accessibilityLabel?: string;
 }
 
 export function AppTextInput({
@@ -31,6 +32,7 @@ export function AppTextInput({
   inputStyle,
   autoCapitalize,
   autoCorrect,
+  accessibilityLabel,
 }: AppTextInputProps) {
   const [focused, setFocused] = useState(false);
 
@@ -49,6 +51,7 @@ export function AppTextInput({
         textAlign="right"
         autoCapitalize={autoCapitalize}
         autoCorrect={autoCorrect}
+        accessibilityLabel={accessibilityLabel ?? label}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         style={[
@@ -76,7 +79,7 @@ const styles = StyleSheet.create({
   input: {
     minHeight: 48,
     borderWidth: 1.5,
-    borderColor: "#E0D5CA",
+    borderColor: Colors.border,
     borderRadius: BorderRadius.md,
     backgroundColor: Colors.cardBackground,
     paddingHorizontal: Spacing.md,

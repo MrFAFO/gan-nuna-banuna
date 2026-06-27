@@ -177,6 +177,9 @@ export default function ParentHomeScreen() {
                     key={childOption.id}
                     activeOpacity={0.85}
                     onPress={() => setParentChildId(childOption.id)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={childOption.name}
                     style={[styles.childPickerItem, selected && styles.childPickerItemSelected]}
                   >
                     <Text
@@ -192,7 +195,12 @@ export default function ParentHomeScreen() {
               })}
             </View>
           ) : null}
-          <TouchableOpacity activeOpacity={0.85} onPress={() => router.push("/parent/child")}>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => router.push("/parent/child")}
+            accessibilityRole="button"
+            accessibilityLabel={`צפייה בפרופיל של ${parentChild?.name ?? "הילד/ה"}`}
+          >
             <AppCard elevation="elevated" style={styles.childCard}>
               <ChildAvatar avatarText={parentChild?.name.slice(0, 1) ?? "י"} />
               <View style={styles.childTextBlock}>
@@ -226,6 +234,8 @@ export default function ParentHomeScreen() {
                   activeOpacity={route ? 0.85 : 1}
                   disabled={!route}
                   onPress={() => route && router.push(route)}
+                  accessibilityRole={route ? "button" : "text"}
+                  accessibilityLabel={`${stat.label}: ${stat.value} ${stat.text}`}
                   style={styles.statPressable}
                 >
                   {card}
@@ -254,6 +264,8 @@ export default function ParentHomeScreen() {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => router.push("/parent/daily-summary")}
+            accessibilityRole="button"
+            accessibilityLabel="היום בגן, צפייה בסיכום היומי"
           >
             <AppCard style={styles.sectionCard}>
               <View style={styles.sectionHeader}>
@@ -262,6 +274,9 @@ export default function ParentHomeScreen() {
                 <Ionicons name="chevron-back" size={16} color={Colors.textSecondary} />
               </View>
 
+              {todayActivities.length === 0 ? (
+                <Text style={styles.emptyText}>עדיין לא הוזנו פעילויות להיום</Text>
+              ) : (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -289,6 +304,7 @@ export default function ParentHomeScreen() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
+              )}
             </AppCard>
           </TouchableOpacity>
 
@@ -296,6 +312,8 @@ export default function ParentHomeScreen() {
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => router.push("/parent/gallery")}
+              accessibilityRole="button"
+              accessibilityLabel="תמונות אחרונות, צפייה בגלריה"
               style={styles.columnPressable}
             >
               <AppCard style={styles.columnCard}>
@@ -304,6 +322,9 @@ export default function ParentHomeScreen() {
                   <Text style={styles.columnTitle}>תמונות אחרונות</Text>
                   <Ionicons name="chevron-back" size={16} color={Colors.textSecondary} />
                 </View>
+                {parentPhotos.length === 0 ? (
+                  <Text style={styles.emptyText}>אין עדיין תמונות</Text>
+                ) : (
                 <View style={styles.photosGrid}>
                   {parentPhotos.map((photo) => (
                     <View key={photo.id} style={styles.photoTile}>
@@ -315,6 +336,7 @@ export default function ParentHomeScreen() {
                     </View>
                   ))}
                 </View>
+                )}
                 <Text style={styles.columnAction}>צפייה בכל התמונות ‹</Text>
               </AppCard>
             </TouchableOpacity>
@@ -322,6 +344,8 @@ export default function ParentHomeScreen() {
             <TouchableOpacity
               activeOpacity={0.85}
               onPress={() => router.push("/messages")}
+              accessibilityRole="button"
+              accessibilityLabel="הודעות מהגן, צפייה בכל ההודעות"
               style={styles.columnPressable}
             >
               <AppCard style={styles.columnCard}>
@@ -330,6 +354,9 @@ export default function ParentHomeScreen() {
                   <Text style={styles.columnTitle}>הודעות מהגן</Text>
                   <Ionicons name="chevron-back" size={16} color={Colors.textSecondary} />
                 </View>
+                {parentMessages.length === 0 ? (
+                  <Text style={styles.emptyText}>אין הודעות חדשות</Text>
+                ) : null}
                 {parentMessages.map((message, index) => (
                   <View
                     key={message.id}
@@ -357,6 +384,8 @@ export default function ParentHomeScreen() {
                 style={styles.quickAction}
                 activeOpacity={0.75}
                 onPress={() => handleQuickActionPress(action.route)}
+                accessibilityRole="button"
+                accessibilityLabel={action.label}
               >
                 <View style={styles.quickActionIcon}>
                   <Ionicons name={action.icon} size={22} color={Colors.primary} />
@@ -431,13 +460,9 @@ const styles = StyleSheet.create({
     right: Spacing.md,
     alignItems: "flex-end",
   },
-  greetingBlock: {
-    alignItems: "center",
-    marginBottom: Spacing.md,
-  },
   greeting: {
     ...Typography.titleLarge,
-    color: "#FFFFFF",
+    color: Colors.white,
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
@@ -686,13 +711,20 @@ const styles = StyleSheet.create({
   },
   quickActionsRow: {
     flexDirection: "row-reverse",
-    justifyContent: "space-between",
+    flexWrap: "wrap",
+    rowGap: Spacing.md,
     marginTop: Spacing.sm,
   },
   quickAction: {
-    flex: 1,
+    width: "25%",
     alignItems: "center",
     gap: Spacing.xs,
+  },
+  emptyText: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+    textAlign: "right",
+    paddingVertical: Spacing.sm,
   },
   quickActionIcon: {
     width: 52,

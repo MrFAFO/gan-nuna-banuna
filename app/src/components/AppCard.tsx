@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.055)",
+    borderColor: Colors.border,
     ...Shadow.card,
   },
   cardElevated: {

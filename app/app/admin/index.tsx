@@ -9,6 +9,7 @@ import { AppHeader } from "../../src/components/AppHeader";
 import { AppScreen } from "../../src/components/AppScreen";
 import { useDaycareColors, useDaycareSettings } from "../../src/daycare/DaycareBrandingContext";
 import { BorderRadius, Spacing } from "../../src/theme/spacing";
+import { Colors } from "../../src/theme/colors";
 
 type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
 
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: Colors.divider,
   },
   rowLast: { borderBottomWidth: 0 },
   iconWrap: {

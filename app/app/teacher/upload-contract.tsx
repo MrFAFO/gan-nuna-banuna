@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
-    borderColor: "#E8DDD2",
+    borderColor: Colors.border,
   },
   childRowActive: {
     borderColor: Colors.primary,
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: BorderRadius.full,
     borderWidth: 2,
-    borderColor: "#D8D8D8",
+    borderColor: Colors.borderNeutral,
     alignItems: "center",
     justifyContent: "center",
   },

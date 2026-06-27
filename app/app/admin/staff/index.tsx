@@ -12,6 +12,7 @@ import { useDaycareColors } from "../../../src/daycare/DaycareBrandingContext";
 import { getStaffMembers, removeStaffMember, type StaffMember } from "../../../src/services/staff.service";
 import { confirmDelete } from "../../../src/utils/confirm";
 import { BorderRadius, Spacing } from "../../../src/theme/spacing";
+import { Colors } from "../../../src/theme/colors";
 
 export default function AdminStaffScreen() {
   const router = useRouter();
@@ -91,7 +92,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: Colors.divider,
   },
   rowText: { flex: 1, alignItems: "flex-end" },
   name: { fontSize: 16, fontWeight: "700" },

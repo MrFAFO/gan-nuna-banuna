@@ -28,6 +28,8 @@ export function AppHeader({
         activeOpacity={0.75}
         onPress={onLeadingPress}
         style={styles.roundButton}
+        accessibilityRole="button"
+        accessibilityLabel={variant === "back" ? "חזרה" : "תפריט"}
       >
         <Ionicons
           name={variant === "back" ? "chevron-forward" : "menu"}
@@ -40,6 +42,10 @@ export function AppHeader({
         activeOpacity={0.75}
         onPress={onBellPress}
         style={styles.roundButton}
+        accessibilityRole="button"
+        accessibilityLabel={
+          badgeCount > 0 ? `התראות, ${badgeCount} חדשות` : "התראות"
+        }
       >
         <Ionicons name="notifications-outline" size={20} color={Colors.textPrimary} />
         {badgeCount > 0 ? (

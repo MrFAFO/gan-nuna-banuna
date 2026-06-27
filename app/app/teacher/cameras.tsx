@@ -138,7 +138,7 @@ export default function TeacherCamerasScreen() {
                   <Switch
                     value={camera.isEnabled}
                     onValueChange={(v) => handleToggle(camera, v)}
-                    trackColor={{ true: Colors.primary, false: "#D8D8D8" }}
+                    trackColor={{ true: Colors.primary, false: Colors.borderNeutral }}
                     thumbColor={Colors.white}
                   />
                   <View style={styles.cameraInfo}>

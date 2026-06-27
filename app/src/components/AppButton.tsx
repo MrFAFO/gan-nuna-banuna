@@ -1,6 +1,13 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import type { StyleProp, TextStyle, ViewStyle } from "react-native";
+import * as Haptics from "expo-haptics";
 
 import { Colors } from "../theme/colors";
 import { BorderRadius, Shadow, Spacing } from "../theme/spacing";
@@ -13,6 +20,11 @@ interface AppButtonProps {
   onPress: () => void;
   variant?: ButtonVariant;
   disabled?: boolean;
+  loading?: boolean;
+  /** Light haptic tap on press (default true). */
+  haptic?: boolean;
+  /** Defaults to `title`. Override for icon-only or contextual labels. */
+  accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
 }
@@ -45,27 +57,62 @@ function getTextStyle(variant: ButtonVariant) {
   }
 }
 
+function getSpinnerColor(variant: ButtonVariant) {
+  switch (variant) {
+    case "secondary":
+      return Colors.textPrimary;
+    case "outline":
+      return Colors.primary;
+    default:
+      return Colors.white;
+  }
+}
+
 export function AppButton({
   title,
   onPress,
   variant = "primary",
   disabled = false,
+  loading = false,
+  haptic = true,
+  accessibilityLabel,
   style,
   textStyle,
 }: AppButtonProps) {
+  const isInactive = disabled || loading;
+
+  function handlePress() {
+    if (isInactive) return;
+    if (haptic) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    }
+    onPress();
+  }
+
   return (
     <TouchableOpacity
       activeOpacity={0.75}
-      disabled={disabled}
-      onPress={onPress}
+      disabled={isInactive}
+      onPress={handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? title}
+      accessibilityState={{ disabled: isInactive, busy: loading }}
       style={[
         styles.base,
         getContainerStyle(variant),
-        disabled ? styles.disabled : undefined,
+        isInactive ? styles.disabled : undefined,
         style,
       ]}
     >
-      <Text style={[styles.text, getTextStyle(variant), textStyle]}>{title}</Text>
+      <View style={styles.content}>
+        {loading ? (
+          <ActivityIndicator size="small" color={getSpinnerColor(variant)} />
+        ) : (
+          <Text style={[styles.text, getTextStyle(variant), textStyle]}>
+            {title}
+          </Text>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -78,6 +125,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.sm + 4,
     borderRadius: BorderRadius.md,
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.sm,
   },
   disabled: {
     opacity: 0.5,
