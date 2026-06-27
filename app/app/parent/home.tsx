@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
@@ -19,111 +12,81 @@ import { AppHeader } from "../../src/components/AppHeader";
 import { AppScreen } from "../../src/components/AppScreen";
 import { AppStateCard } from "../../src/components/AppStateCard";
 import { BottomNavBar } from "../../src/components/BottomNavBar";
+import { IllustratedIcon } from "../../src/components/IllustratedIcon";
 import { StatusBadge } from "../../src/components/StatusBadge";
 import { useAsyncData } from "../../src/hooks/useAsyncData";
 import { useHero } from "../../src/daycare/DaycareBrandingContext";
 import { Colors } from "../../src/theme/colors";
 import { Typography } from "../../src/theme/typography";
-import { BorderRadius, Shadow, Spacing } from "../../src/theme/spacing";
+import { BorderRadius, Spacing } from "../../src/theme/spacing";
+import type { IllustratedIconName } from "../../src/theme/illustratedIcons";
 import {
   getCurrentDaycareName,
   getCurrentParentChildId,
-  getCurrentUser,
 } from "../../src/services/auth.service";
 import { getChildById } from "../../src/services/children.service";
 import { getContractByChildId } from "../../src/services/contracts.service";
-import { getDailyActivities } from "../../src/services/dailyReports.service";
-import {
-  getParentHomeMessages,
-  getParentHomePhotos,
-  getParentHomeStats,
-} from "../../src/services/parentHome.service";
+import { getParentHomeStats } from "../../src/services/parentHome.service";
 import { useBottomNavPress } from "../../src/navigation/useBottomNavPress";
 
-type IoniconName = React.ComponentProps<typeof Ionicons>["name"];
-
-const STAT_ICONS: Record<string, IoniconName> = {
-  events: "calendar-outline",
-  payments: "wallet-outline",
-  messages: "notifications-outline",
-  attendance: "people-outline",
+const STAT_ICONS: Record<string, IllustratedIconName> = {
+  events: "events",
+  messages: "messages",
+  attendance: "attendance",
+  children: "children",
 };
 
-const STAT_ROUTES: Partial<Record<string, Href>> = {
-  events: "/parent/upcoming-events",
-  messages: "/messages",
-  attendance: "/parent/daily-summary",
-};
-
-const parentQuickActions: {
+interface HomeAction {
   id: string;
+  icon: IllustratedIconName;
   label: string;
-  icon: IoniconName;
-  route?: Href;
-}[] = [
-  { id: "contact", label: "צור קשר עם הגן", icon: "call-outline", route: "/parent/contact" },
-  { id: "cameras", label: "מצלמות לייב", icon: "videocam-outline", route: "/parent/cameras" as Href },
-  { id: "albums", label: "אלבומים", icon: "albums-outline", route: "/parent/albums" as Href },
-  {
-    id: "events",
-    label: "הצעות מהגן",
-    icon: "sparkles-outline",
-    route: "/parent/event-suggestions" as Href,
-  },
-  {
-    id: "contracts",
-    label: "טפסים ומסמכים",
-    icon: "document-text-outline",
-    route: "/parent/contract-renewal",
-  },
-  {
-    id: "calendar",
-    label: "לוח שנה",
-    icon: "calendar-outline",
-    route: "/calendar",
-  },
-  { id: "profile", label: "פרופיל", icon: "person-outline", route: "/profile" },
+  subtitle: string;
+  route: Href;
+}
+
+const HOME_ACTIONS: HomeAction[] = [
+  { id: "calendar", icon: "calendar", label: "לוח שנה", subtitle: "אירועים ופעילויות", route: "/calendar" },
+  { id: "documents", icon: "documents", label: "מסמכים", subtitle: "טפסים ומסמכים", route: "/parent/contract-renewal" },
+  { id: "dailySummary", icon: "dailySummary", label: "סיכום יום", subtitle: "מעקב ותיעוד יומי", route: "/parent/daily-summary" },
+  { id: "albums", icon: "albums", label: "אלבומים", subtitle: "אלבומי תמונות", route: "/parent/albums" as Href },
+  { id: "cameras", icon: "cameras", label: "מצלמות", subtitle: "צפייה בזמן אמת", route: "/parent/cameras" as Href },
+  { id: "photos", icon: "photos", label: "תמונות", subtitle: "תמונות אחרונות", route: "/parent/gallery" },
+  { id: "contact", icon: "contact", label: "צור קשר", subtitle: "שיחה ישירה עם הגן", route: "/parent/contact" },
+  { id: "suggestions", icon: "suggestions", label: "הצעות מהגן", subtitle: "רעיונות ופעילויות", route: "/parent/event-suggestions" as Href },
+  { id: "messages", icon: "messages", label: "הודעות מהגן", subtitle: "עדכונים חשובים", route: "/messages" },
 ];
+
+function formatToday() {
+  return new Date().toLocaleDateString("he-IL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
 
 export default function ParentHomeScreen() {
   const router = useRouter();
   const handleBottomNavPress = useBottomNavPress("parent");
   const { profile, setParentChildId } = useAuth();
-  const parent = getCurrentUser();
   const parentChildId = getCurrentParentChildId();
   const hasMultipleChildren = (profile?.parentChildIds.length ?? 0) > 1;
 
   const { data, loading, error, reload } = useAsyncData(async () => {
     const childIds = profile?.parentChildIds ?? [parentChildId];
     const children = await Promise.all(childIds.map((id) => getChildById(id)));
-    const [child, contract, activities, stats, photos, messages] = await Promise.all([
+    const [child, contract, stats] = await Promise.all([
       getChildById(parentChildId),
       getContractByChildId(parentChildId),
-      getDailyActivities(),
       getParentHomeStats(),
-      getParentHomePhotos(),
-      getParentHomeMessages(),
     ]);
-    return { children: children.filter(Boolean), child, contract, activities, stats, photos, messages };
+    return { children: children.filter(Boolean), child, contract, stats };
   }, [parentChildId, profile?.parentChildIds]);
 
   const parentChild = data?.child;
   const parentContract = data?.contract;
   const hasPendingContract = parentContract?.status === "sent";
-  const todayActivities = data?.activities ?? [];
   const parentStats = data?.stats ?? [];
-  const parentPhotos = data?.photos ?? [];
-  const parentMessages = data?.messages ?? [];
   const parentHomeHero = useHero("parentHome");
-
-  function handleQuickActionPress(route: Href | undefined) {
-    if (route) {
-      router.push(route);
-      return;
-    }
-
-    Alert.alert("בקרוב", "הפעולה הזו תתווסף בהמשך.");
-  }
 
   return (
     <View style={styles.root}>
@@ -143,8 +106,10 @@ export default function ParentHomeScreen() {
             />
           </View>
           <View style={styles.heroGreeting}>
-            <Text style={styles.greeting}>שלום, {parent.name} ♥</Text>
-            <Text style={styles.greetingSubtext}>כיף שבאת הביתה</Text>
+            <Text style={styles.greeting}>יום טוב ☀️</Text>
+            <Text style={styles.greetingSubtext}>
+              יום נפלא ב{getCurrentDaycareName()}!
+            </Text>
           </View>
         </View>
 
@@ -165,237 +130,125 @@ export default function ParentHomeScreen() {
             />
           ) : (
             <>
-          {hasMultipleChildren ? (
-            <View style={styles.childPicker}>
-              {(data?.children ?? []).map((childOption) => {
-                if (!childOption) {
-                  return null;
-                }
-                const selected = childOption.id === parentChildId;
-                return (
-                  <TouchableOpacity
-                    key={childOption.id}
-                    activeOpacity={0.85}
-                    onPress={() => setParentChildId(childOption.id)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={childOption.name}
-                    style={[styles.childPickerItem, selected && styles.childPickerItemSelected]}
-                  >
-                    <Text
-                      style={[
-                        styles.childPickerText,
-                        selected && styles.childPickerTextSelected,
-                      ]}
-                    >
-                      {childOption.name}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ) : null}
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => router.push("/parent/child")}
-            accessibilityRole="button"
-            accessibilityLabel={`צפייה בפרופיל של ${parentChild?.name ?? "הילד/ה"}`}
-          >
-            <AppCard elevation="elevated" style={styles.childCard}>
-              <ChildAvatar avatarText={parentChild?.name.slice(0, 1) ?? "י"} />
-              <View style={styles.childTextBlock}>
-                <Text style={styles.childName}>{parentChild?.name ?? "ילד/ה"}</Text>
-                <Text style={styles.childSubtitle}>{getCurrentDaycareName()}</Text>
-              </View>
-              <Ionicons name="chevron-back" size={20} color={Colors.textSecondary} />
-            </AppCard>
-          </TouchableOpacity>
-
-          <View style={styles.statsGrid}>
-            {parentStats.map((stat) => {
-              const route = STAT_ROUTES[stat.id];
-              const card = (
-                <AppCard style={styles.statCard}>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
-                  <Ionicons
-                    name={STAT_ICONS[stat.id] ?? "ellipse-outline"}
-                    size={22}
-                    color={Colors.primary}
-                    style={styles.statIcon}
-                  />
-                  <Text style={styles.statValue}>{stat.value}</Text>
-                  <Text style={styles.statText}>{stat.text}</Text>
-                </AppCard>
-              );
-
-              return (
-                <TouchableOpacity
-                  key={stat.id}
-                  activeOpacity={route ? 0.85 : 1}
-                  disabled={!route}
-                  onPress={() => route && router.push(route)}
-                  accessibilityRole={route ? "button" : "text"}
-                  accessibilityLabel={`${stat.label}: ${stat.value} ${stat.text}`}
-                  style={styles.statPressable}
-                >
-                  {card}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {hasPendingContract && (
-            <AppCard style={styles.contractAlert}>
-              <View style={styles.contractHeader}>
-                <StatusBadge status="sent" />
-                <Text style={styles.contractTitle}>חוזה חדש ממתין לחתימה</Text>
-              </View>
-              <Text style={styles.contractText}>
-                יש לעיין בחוזה ולחתום עליו בהקדם כדי להשלים את ההרשמה.
-              </Text>
-              <AppButton
-                title="חתימה על חוזה"
-                onPress={() => router.push("/parent/contract-renewal")}
-                style={styles.contractButton}
-              />
-            </AppCard>
-          )}
-
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={() => router.push("/parent/daily-summary")}
-            accessibilityRole="button"
-            accessibilityLabel="היום בגן, צפייה בסיכום היומי"
-          >
-            <AppCard style={styles.sectionCard}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="calendar-outline" size={18} color={Colors.primary} />
-                <Text style={styles.sectionTitle}>היום בגן</Text>
-                <Ionicons name="chevron-back" size={16} color={Colors.textSecondary} />
-              </View>
-
-              {todayActivities.length === 0 ? (
-                <Text style={styles.emptyText}>עדיין לא הוזנו פעילויות להיום</Text>
-              ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.activitiesScroll}
-              >
-                {todayActivities.map((activity) => (
-                  <TouchableOpacity
-                    key={activity.id}
-                    activeOpacity={0.75}
-                    onPress={() => router.push("/parent/daily-summary")}
-                    style={styles.activityCard}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${activity.title}, צפייה בסיכום היומי`}
-                  >
-                    <Text style={styles.activityTime}>{activity.time}</Text>
-                    <View style={styles.activityThumb}>
-                      {activity.imageUrl ? (
-                        <Image source={{ uri: activity.imageUrl }} style={styles.activityImage} />
-                      ) : (
-                        <Ionicons name="image-outline" size={26} color={Colors.primary} />
-                      )}
-                    </View>
-                    <Text style={styles.activityTitle}>{activity.title}</Text>
-                    <Text style={styles.activityText} numberOfLines={1}>
-                      {activity.description}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-              )}
-            </AppCard>
-          </TouchableOpacity>
-
-          <View style={styles.twoColumns}>
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => router.push("/parent/gallery")}
-              accessibilityRole="button"
-              accessibilityLabel="תמונות אחרונות, צפייה בגלריה"
-              style={styles.columnPressable}
-            >
-              <AppCard style={styles.columnCard}>
-                <View style={styles.sectionHeader}>
-                  <Ionicons name="images-outline" size={18} color={Colors.primary} />
-                  <Text style={styles.columnTitle}>תמונות אחרונות</Text>
-                  <Ionicons name="chevron-back" size={16} color={Colors.textSecondary} />
+              {hasMultipleChildren ? (
+                <View style={styles.childPicker}>
+                  {(data.children ?? []).map((childOption) => {
+                    if (!childOption) {
+                      return null;
+                    }
+                    const selected = childOption.id === parentChildId;
+                    return (
+                      <TouchableOpacity
+                        key={childOption.id}
+                        activeOpacity={0.85}
+                        onPress={() => setParentChildId(childOption.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        accessibilityLabel={childOption.name}
+                        style={[styles.childPickerItem, selected && styles.childPickerItemSelected]}
+                      >
+                        <Text
+                          style={[
+                            styles.childPickerText,
+                            selected && styles.childPickerTextSelected,
+                          ]}
+                        >
+                          {childOption.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
-                {parentPhotos.length === 0 ? (
-                  <Text style={styles.emptyText}>אין עדיין תמונות</Text>
-                ) : (
-                <View style={styles.photosGrid}>
-                  {parentPhotos.map((photo) => (
-                    <View key={photo.id} style={styles.photoTile}>
-                      {"imageUrl" in photo && photo.imageUrl ? (
-                        <Image source={{ uri: photo.imageUrl }} style={styles.photoImage} />
-                      ) : (
-                        <Ionicons name="image-outline" size={22} color={Colors.primary} />
-                      )}
+              ) : null}
+
+              <AppCard style={styles.summaryCard}>
+                <View style={styles.summaryHeader}>
+                  <Text style={styles.summaryTitle}>סיכום היום</Text>
+                  <Text style={styles.summaryDate}>{formatToday()}</Text>
+                </View>
+                <View style={styles.statsGrid}>
+                  {parentStats.map((stat) => (
+                    <View key={stat.id} style={styles.statItem}>
+                      <Text style={styles.statLabel} numberOfLines={1}>
+                        {stat.label}
+                      </Text>
+                      <IllustratedIcon
+                        name={STAT_ICONS[stat.id] ?? "events"}
+                        size={44}
+                        style={styles.statIcon}
+                      />
+                      <Text style={styles.statValue}>{stat.value}</Text>
+                      <Text style={styles.statText} numberOfLines={1}>
+                        {stat.text}
+                      </Text>
                     </View>
                   ))}
                 </View>
-                )}
-                <Text style={styles.columnAction}>צפייה בכל התמונות ‹</Text>
               </AppCard>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => router.push("/messages")}
-              accessibilityRole="button"
-              accessibilityLabel="הודעות מהגן, צפייה בכל ההודעות"
-              style={styles.columnPressable}
-            >
-              <AppCard style={styles.columnCard}>
-                <View style={styles.sectionHeader}>
-                  <Ionicons name="megaphone-outline" size={18} color={Colors.primary} />
-                  <Text style={styles.columnTitle}>הודעות מהגן</Text>
-                  <Ionicons name="chevron-back" size={16} color={Colors.textSecondary} />
-                </View>
-                {parentMessages.length === 0 ? (
-                  <Text style={styles.emptyText}>אין הודעות חדשות</Text>
-                ) : null}
-                {parentMessages.map((message, index) => (
-                  <View
-                    key={message.id}
-                    style={[
-                      styles.messageItem,
-                      index === parentMessages.length - 1 && styles.messageItemLast,
-                    ]}
+              {hasPendingContract ? (
+                <AppCard style={styles.contractAlert}>
+                  <View style={styles.contractHeader}>
+                    <StatusBadge status="sent" />
+                    <Text style={styles.contractTitle}>חוזה חדש ממתין לחתימה</Text>
+                  </View>
+                  <Text style={styles.contractText}>
+                    יש לעיין בחוזה ולחתום עליו בהקדם כדי להשלים את ההרשמה.
+                  </Text>
+                  <AppButton
+                    title="חתימה על חוזה"
+                    onPress={() => router.push("/parent/contract-renewal")}
+                    style={styles.contractButton}
+                  />
+                </AppCard>
+              ) : null}
+
+              <View style={styles.actionsGrid}>
+                {HOME_ACTIONS.map((action) => (
+                  <TouchableOpacity
+                    key={action.id}
+                    activeOpacity={0.85}
+                    onPress={() => router.push(action.route)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${action.label}, ${action.subtitle}`}
+                    style={styles.actionPressable}
                   >
-                    <Text style={styles.messageDate}>{message.date}</Text>
-                    <Text style={styles.messageTitle}>{message.title}</Text>
-                    <Text style={styles.messageText} numberOfLines={2}>
-                      {message.description}
+                    <AppCard style={styles.actionCard}>
+                      <IllustratedIcon name={action.icon} size={56} />
+                      <Text style={styles.actionLabel} numberOfLines={1}>
+                        {action.label}
+                      </Text>
+                      <Text style={styles.actionSubtitle} numberOfLines={1}>
+                        {action.subtitle}
+                      </Text>
+                    </AppCard>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => router.push("/parent/child")}
+                accessibilityRole="button"
+                accessibilityLabel={`צפייה בפרופיל של ${parentChild?.name ?? "הילד/ה"}`}
+              >
+                <AppCard elevation="elevated" style={styles.childCard}>
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>
+                      {parentChild?.name.slice(0, 1) ?? "י"}
                     </Text>
                   </View>
-                ))}
-                <Text style={styles.columnAction}>לכל ההודעות ‹</Text>
-              </AppCard>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.quickActionsRow}>
-            {parentQuickActions.map((action) => (
-              <TouchableOpacity
-                key={action.id}
-                style={styles.quickAction}
-                activeOpacity={0.75}
-                onPress={() => handleQuickActionPress(action.route)}
-                accessibilityRole="button"
-                accessibilityLabel={action.label}
-              >
-                <View style={styles.quickActionIcon}>
-                  <Ionicons name={action.icon} size={22} color={Colors.primary} />
-                </View>
-                <Text style={styles.quickActionLabel}>{action.label}</Text>
+                  <View style={styles.childTextBlock}>
+                    <Text style={styles.childName}>
+                      היום של {parentChild?.name ?? "ילד/ה"}
+                    </Text>
+                    <Text style={styles.childSubtitle}>
+                      כל העדכונים והרגעים החשובים מהיום
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-back" size={20} color={Colors.textSecondary} />
+                </AppCard>
               </TouchableOpacity>
-            ))}
-          </View>
             </>
           )}
         </View>
@@ -410,14 +263,6 @@ export default function ParentHomeScreen() {
   );
 }
 
-function ChildAvatar({ avatarText }: { avatarText: string }) {
-  return (
-    <View style={styles.avatar}>
-      <Text style={styles.avatarText}>{avatarText}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -428,7 +273,7 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     width: "100%",
-    height: 340,
+    height: 300,
     position: "relative",
     backgroundColor: Colors.background,
     borderBottomLeftRadius: BorderRadius.xl,
@@ -457,10 +302,10 @@ const styles = StyleSheet.create({
   },
   heroGreeting: {
     position: "absolute",
-    bottom: Spacing.lg,
+    top: Spacing.xxl + Spacing.md,
     left: Spacing.md,
     right: Spacing.md,
-    alignItems: "flex-end",
+    alignItems: "center",
   },
   greeting: {
     ...Typography.titleLarge,
@@ -468,28 +313,31 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
-    textAlign: "right",
+    textAlign: "center",
   },
   greetingSubtext: {
     ...Typography.bodyMedium,
-    color: "rgba(255,255,255,0.85)",
-    textAlign: "right",
+    color: "rgba(255,255,255,0.95)",
+    textAlign: "center",
     marginTop: 2,
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   body: {
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
+    marginTop: -Spacing.xl,
     gap: Spacing.md,
   },
   childPicker: {
     flexDirection: "row-reverse",
     flexWrap: "wrap",
     gap: Spacing.xs,
-    marginBottom: Spacing.sm,
   },
   childPickerItem: {
+    minHeight: 44,
+    justifyContent: "center",
     paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.cardBackground,
     borderWidth: 1,
@@ -506,6 +354,106 @@ const styles = StyleSheet.create({
   },
   childPickerTextSelected: {
     color: Colors.primary,
+  },
+  summaryCard: {
+    gap: Spacing.md,
+  },
+  summaryHeader: {
+    flexDirection: "row-reverse",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  summaryTitle: {
+    ...Typography.title,
+    color: Colors.textPrimary,
+  },
+  summaryDate: {
+    ...Typography.caption,
+    color: Colors.textSecondary,
+  },
+  statsGrid: {
+    flexDirection: "row-reverse",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: Spacing.sm,
+  },
+  statItem: {
+    flexBasis: "31%",
+    flexGrow: 1,
+    alignItems: "center",
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.background,
+  },
+  statIcon: {
+    marginVertical: 4,
+  },
+  statValue: {
+    ...Typography.title,
+    color: Colors.primary,
+  },
+  statLabel: {
+    ...Typography.label,
+    color: Colors.textPrimary,
+    textAlign: "center",
+  },
+  statText: {
+    ...Typography.label,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    marginTop: 2,
+  },
+  contractAlert: {
+    backgroundColor: Colors.sentBackground,
+    borderColor: Colors.reminderBorder,
+  },
+  contractHeader: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: Spacing.sm,
+  },
+  contractTitle: {
+    flex: 1,
+    ...Typography.subtitle,
+    color: Colors.textPrimary,
+    textAlign: "right",
+  },
+  contractText: {
+    color: Colors.sentText,
+    ...Typography.body,
+    textAlign: "right",
+    marginTop: Spacing.sm,
+  },
+  contractButton: {
+    marginTop: Spacing.md,
+  },
+  actionsGrid: {
+    flexDirection: "row-reverse",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: Spacing.md,
+  },
+  actionPressable: {
+    width: "31.5%",
+  },
+  actionCard: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xs,
+    gap: 4,
+  },
+  actionLabel: {
+    ...Typography.captionMedium,
+    color: Colors.textPrimary,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  actionSubtitle: {
+    ...Typography.label,
+    color: Colors.textSecondary,
+    textAlign: "center",
   },
   childCard: {
     flexDirection: "row-reverse",
@@ -538,208 +486,5 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
     textAlign: "right",
-  },
-  statsGrid: {
-    flexDirection: "row-reverse",
-    flexWrap: "wrap",
-    gap: Spacing.sm,
-  },
-  statPressable: {
-    width: "48%",
-  },
-  statCard: {
-    width: "100%",
-    alignItems: "center",
-  },
-  statIcon: {
-    marginVertical: 4,
-  },
-  statValue: {
-    ...Typography.display,
-    color: Colors.primary,
-  },
-  statLabel: {
-    ...Typography.captionMedium,
-    color: Colors.textPrimary,
-    textAlign: "center",
-  },
-  statText: {
-    ...Typography.label,
-    color: Colors.textSecondary,
-    textAlign: "center",
-    marginTop: 2,
-  },
-  contractAlert: {
-    backgroundColor: Colors.sentBackground,
-    borderColor: "rgba(192,120,32,0.2)",
-  },
-  contractHeader: {
-    flexDirection: "row-reverse",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: Spacing.sm,
-  },
-  contractTitle: {
-    flex: 1,
-    ...Typography.subtitle,
-    color: Colors.textPrimary,
-    textAlign: "right",
-  },
-  contractText: {
-    color: Colors.sentText,
-    ...Typography.body,
-    textAlign: "right",
-    marginTop: Spacing.sm,
-  },
-  contractButton: {
-    marginTop: Spacing.md,
-  },
-  sectionCard: {},
-  sectionHeader: {
-    flexDirection: "row-reverse",
-    alignItems: "center",
-    gap: Spacing.xs,
-    marginBottom: Spacing.sm,
-  },
-  sectionTitle: {
-    flex: 1,
-    ...Typography.subtitle,
-    color: Colors.textPrimary,
-    textAlign: "right",
-  },
-  activitiesScroll: {
-    flexDirection: "row-reverse",
-    gap: Spacing.sm,
-  },
-  activityCard: {
-    width: 140,
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.lg,
-    backgroundColor: Colors.background,
-  },
-  activityTime: {
-    ...Typography.label,
-    color: Colors.textSecondary,
-    textAlign: "right",
-  },
-  activityThumb: {
-    height: 70,
-    borderRadius: BorderRadius.md,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.secondary,
-    marginVertical: Spacing.xs,
-    overflow: "hidden",
-  },
-  activityImage: {
-    width: "100%",
-    height: "100%",
-  },
-  activityTitle: {
-    ...Typography.bodyMedium,
-    color: Colors.textPrimary,
-    textAlign: "right",
-  },
-  activityText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    textAlign: "right",
-    marginTop: 2,
-  },
-  twoColumns: {
-    flexDirection: "row-reverse",
-    gap: Spacing.sm,
-  },
-  columnPressable: {
-    flex: 1,
-  },
-  columnCard: {
-    flex: 1,
-  },
-  columnTitle: {
-    flex: 1,
-    ...Typography.bodyMedium,
-    color: Colors.textPrimary,
-    textAlign: "right",
-  },
-  columnAction: {
-    color: Colors.primary,
-    ...Typography.labelBold,
-    textAlign: "right",
-    marginTop: Spacing.sm,
-  },
-  photosGrid: {
-    flexDirection: "row-reverse",
-    flexWrap: "wrap",
-    gap: Spacing.xs,
-  },
-  photoTile: {
-    width: "31%",
-    aspectRatio: 1,
-    borderRadius: BorderRadius.md,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.secondary,
-    overflow: "hidden",
-  },
-  photoImage: {
-    width: "100%",
-    height: "100%",
-  },
-  messageItem: {
-    paddingVertical: Spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.background,
-    alignItems: "flex-end",
-  },
-  messageItemLast: {
-    borderBottomWidth: 0,
-  },
-  messageDate: {
-    ...Typography.label,
-    color: Colors.textSecondary,
-  },
-  messageTitle: {
-    ...Typography.captionMedium,
-    color: Colors.textPrimary,
-    marginTop: 2,
-    textAlign: "right",
-  },
-  messageText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    marginTop: 2,
-    textAlign: "right",
-  },
-  quickActionsRow: {
-    flexDirection: "row-reverse",
-    flexWrap: "wrap",
-    rowGap: Spacing.md,
-    marginTop: Spacing.sm,
-  },
-  quickAction: {
-    width: "25%",
-    alignItems: "center",
-    gap: Spacing.xs,
-  },
-  emptyText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-    textAlign: "right",
-    paddingVertical: Spacing.sm,
-  },
-  quickActionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: BorderRadius.full,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.secondary,
-    ...Shadow.subtle,
-  },
-  quickActionLabel: {
-    ...Typography.label,
-    color: Colors.textPrimary,
-    textAlign: "center",
   },
 });
