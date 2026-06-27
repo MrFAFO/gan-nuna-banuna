@@ -35,7 +35,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { signOut, profile } = useAuth();
   const role = getCurrentUserRole();
-  const variant = role === "teacher" ? "teacher" : "parent";
+  const variant = role === "teacher" || role === "admin" ? "teacher" : "parent";
   const handleBottomNavPress = useBottomNavPress(variant);
   const pilotLabel = getPilotReadinessLabel();
 
