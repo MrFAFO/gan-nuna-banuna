@@ -6,11 +6,12 @@ import { Image } from "expo-image";
 import { Spacing } from "../../theme/spacing";
 import { HomeAssets } from "./homeAssets";
 
-/** Matches summaryWrap horizontal inset in parent/home.tsx */
+/** Figma reference frame — cap layout so web/desktop does not inflate cells */
+const FIGMA_FRAME_W = 393;
 const SUMMARY_MARGIN = Spacing.md;
 const CARD_PADDING = Spacing.md;
 const COLUMN_GAP = Spacing.sm;
-/** Figma mini-card height (node 36:24) */
+/** Figma mini-card (node 36:24) */
 const ITEM_H = 99;
 const ILLUSTRATION_ASPECT = 84 / 90;
 
@@ -56,13 +57,17 @@ interface TodaySummaryCardProps {
 
 export function TodaySummaryCard({ values }: TodaySummaryCardProps) {
   const { width: screenWidth } = useWindowDimensions();
-  const innerWidth = screenWidth - SUMMARY_MARGIN * 2 - CARD_PADDING * 2;
+  const layoutWidth = Math.min(screenWidth, FIGMA_FRAME_W);
+  const cardOuterWidth = layoutWidth - SUMMARY_MARGIN * 2;
+  const innerWidth = cardOuterWidth - CARD_PADDING * 2;
   const itemWidth = (innerWidth - COLUMN_GAP * 3) / 4;
-  const illustrationWidth = Math.min(72, Math.round(itemWidth * 0.88));
+  const illustrationWidth = Math.round(Math.min(56, itemWidth - 12));
   const illustrationHeight = Math.round(illustrationWidth * ILLUSTRATION_ASPECT);
+  const illustrationTop = 24;
+  const illustrationLeft = (itemWidth - illustrationWidth) / 2;
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { width: cardOuterWidth, alignSelf: "center" }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle} numberOfLines={1}>
           סיכום היום
@@ -72,25 +77,27 @@ export function TodaySummaryCard({ values }: TodaySummaryCardProps) {
         </Text>
       </View>
 
-      <View style={[styles.grid, { gap: COLUMN_GAP, height: ITEM_H }]}>
+      <View style={[styles.grid, { width: innerWidth, gap: COLUMN_GAP, height: ITEM_H }]}>
         {SUMMARY_ITEMS.map((item) => (
-          <View key={item.key} style={[styles.item, { width: itemWidth, height: ITEM_H }]}>
-            <Text
-              style={styles.itemLabel}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.8}
-            >
+          <View
+            key={item.key}
+            style={[styles.item, { width: itemWidth, height: ITEM_H }]}
+          >
+            <Text style={styles.itemLabel} numberOfLines={2}>
               {item.label}
             </Text>
-            <View style={styles.illustrationWrap}>
-              <Image
-                source={item.illustration}
-                style={{ width: illustrationWidth, height: illustrationHeight }}
-                contentFit="contain"
-                transition={120}
-              />
-            </View>
+            <Image
+              source={item.illustration}
+              style={{
+                position: "absolute",
+                top: illustrationTop,
+                left: illustrationLeft,
+                width: illustrationWidth,
+                height: illustrationHeight,
+              }}
+              contentFit="contain"
+              transition={120}
+            />
             <Text style={styles.itemValue} numberOfLines={1}>
               {values[item.key]}
             </Text>
@@ -109,7 +116,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingTop: 12,
     paddingHorizontal: CARD_PADDING,
-    paddingBottom: 18,
+    paddingBottom: 14,
     shadowColor: "#1F3A2B",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.08,
@@ -139,6 +146,7 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: "row-reverse",
+    alignSelf: "center",
   },
   item: {
     backgroundColor: "#FFFCF8",
@@ -146,29 +154,25 @@ const styles = StyleSheet.create({
     borderColor: "#F1E6D7",
     borderRadius: 12,
     overflow: "hidden",
-    alignItems: "center",
-    paddingTop: 7,
-    paddingBottom: 8,
-    paddingHorizontal: 2,
   },
   itemLabel: {
-    width: "100%",
-    fontSize: 9,
-    lineHeight: 12,
+    position: "absolute",
+    top: 5,
+    left: 3,
+    right: 3,
+    fontSize: 8,
+    lineHeight: 10,
     fontWeight: "500",
     color: DARK_GREEN,
     textAlign: "center",
   },
-  illustrationWrap: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   itemValue: {
-    width: "100%",
-    fontSize: 16,
-    lineHeight: 20,
+    position: "absolute",
+    bottom: 6,
+    left: 0,
+    right: 0,
+    fontSize: 14,
+    lineHeight: 18,
     fontWeight: "700",
     color: DARK_GREEN,
     textAlign: "center",
