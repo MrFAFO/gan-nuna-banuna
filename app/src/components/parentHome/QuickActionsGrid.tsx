@@ -5,37 +5,35 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 
-import { AppCard } from "../AppCard";
-import { Colors } from "../../theme/colors";
-import { Spacing } from "../../theme/spacing";
-import { Typography } from "../../theme/typography";
 import { HomeAssets } from "./homeAssets";
 
 interface QuickAction {
   id: string;
-  label: string;
+  title: string;
+  subtitle: string;
   illustration: ImageSourcePropType;
   route: Href;
 }
 
 /**
- * Complete 3x3 grid. Order is the approved RTL visual order; with a
+ * Figma node 22:45 — 3×3 grid. Order is the approved RTL visual order: with a
  * row-reverse wrapping container the first item in each triple renders on the
- * right. Each entry keeps its existing product route.
+ * right (matching the Figma column positions x=246 / 123 / 0). Titles and
+ * subtitles are read from Figma; routes are preserved from the product.
  */
 const QUICK_ACTIONS: QuickAction[] = [
-  // Row 1
-  { id: "daily-summary", label: "סיכום יום", illustration: HomeAssets.quickActions.dailySummary, route: "/parent/daily-summary" },
-  { id: "forms", label: "טפסים ומסמכים", illustration: HomeAssets.quickActions.forms, route: "/parent/contract-renewal" },
-  { id: "calendar", label: "לוח שנה", illustration: HomeAssets.quickActions.calendar, route: "/calendar" },
-  // Row 2
-  { id: "today-photos", label: "תמונות מהיום", illustration: HomeAssets.quickActions.todayPhotos, route: "/parent/gallery" },
-  { id: "live-cameras", label: "מצלמות לייב", illustration: HomeAssets.quickActions.liveCameras, route: "/parent/cameras" as Href },
-  { id: "albums", label: "אלבומים", illustration: HomeAssets.quickActions.albums, route: "/parent/albums" as Href },
-  // Row 3
-  { id: "announcements", label: "הודעות מהגן", illustration: HomeAssets.quickActions.announcements, route: "/messages" },
-  { id: "suggestions", label: "הצעות מהגן", illustration: HomeAssets.quickActions.suggestions, route: "/parent/event-suggestions" as Href },
-  { id: "contact", label: "צור קשר עם הגן", illustration: HomeAssets.quickActions.contact, route: "/parent/contact" },
+  // Row 1 (right → left): Daily Summary, Forms, Calendar
+  { id: "daily-summary", title: "סיכום יום", subtitle: "מעקב ותיעוד יומי", illustration: HomeAssets.quickActions.dailySummary, route: "/parent/daily-summary" },
+  { id: "forms", title: "מסמכים", subtitle: "טפסים ומסמכים", illustration: HomeAssets.quickActions.forms, route: "/parent/contract-renewal" },
+  { id: "calendar", title: "לוח שנה", subtitle: "אירועים ופעילויות", illustration: HomeAssets.quickActions.calendar, route: "/calendar" },
+  // Row 2: Today Photos, Live Cameras, Albums
+  { id: "today-photos", title: "תמונות", subtitle: "תמונות אחרונות", illustration: HomeAssets.quickActions.todayPhotos, route: "/parent/gallery" },
+  { id: "live-cameras", title: "מצלמות", subtitle: "צפייה בזמן אמת", illustration: HomeAssets.quickActions.liveCameras, route: "/parent/cameras" as Href },
+  { id: "albums", title: "אלבומים", subtitle: "אלבומי תמונות", illustration: HomeAssets.quickActions.albums, route: "/parent/albums" as Href },
+  // Row 3: Announcements, Suggestions, Contact
+  { id: "announcements", title: "הודעות מהגן", subtitle: "עדכונים חשובים", illustration: HomeAssets.quickActions.announcements, route: "/messages" },
+  { id: "suggestions", title: "הצעות מהגן", subtitle: "רעיונות מהגן", illustration: HomeAssets.quickActions.suggestions, route: "/parent/event-suggestions" as Href },
+  { id: "contact", title: "צור קשר", subtitle: "שיחה ישירה עם הגן", illustration: HomeAssets.quickActions.contact, route: "/parent/contact" },
 ];
 
 export function QuickActionsGrid() {
@@ -49,52 +47,71 @@ export function QuickActionsGrid() {
           activeOpacity={0.85}
           onPress={() => router.push(action.route)}
           accessibilityRole="button"
-          accessibilityLabel={action.label}
-          style={styles.cell}
+          accessibilityLabel={`${action.title}. ${action.subtitle}`}
+          style={styles.card}
         >
-          <AppCard style={styles.card}>
-            <Image
-              source={action.illustration}
-              style={styles.illustration}
-              contentFit="contain"
-              transition={120}
-            />
-            <Text style={styles.label} numberOfLines={2}>
-              {action.label}
-            </Text>
-          </AppCard>
+          <Image
+            source={action.illustration}
+            style={styles.illustration}
+            contentFit="contain"
+            transition={120}
+          />
+          <Text style={styles.title} numberOfLines={1}>
+            {action.title}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
+            {action.subtitle}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>
   );
 }
 
+const DARK_GREEN = "#315A44";
+
 const styles = StyleSheet.create({
   grid: {
     flexDirection: "row-reverse",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    rowGap: Spacing.md,
-  },
-  cell: {
-    width: "31.5%",
+    rowGap: 12,
   },
   card: {
-    flex: 1,
+    // 3 columns within a 361-wide content area, 8px column gutter → ~115 each.
+    width: "31.6%",
+    height: 116,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    overflow: "hidden",
     alignItems: "center",
-    justifyContent: "flex-start",
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xs,
-    minHeight: 104,
-    gap: Spacing.xs,
+    paddingTop: 2,
+    paddingBottom: 10,
+    paddingHorizontal: 4,
+    // Figma: shadow 0 4 14 rgba(31,58,43,0.07)
+    shadowColor: "#1F3A2B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    elevation: 3,
   },
   illustration: {
-    width: 52,
-    height: 52,
+    width: 78,
+    height: 72,
   },
-  label: {
-    ...Typography.captionMedium,
-    color: Colors.textPrimary,
+  title: {
+    marginTop: 0,
+    fontSize: 13,
+    lineHeight: 16,
+    fontWeight: "700",
+    color: DARK_GREEN,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 10,
+    lineHeight: 12,
+    fontWeight: "400",
+    color: DARK_GREEN,
     textAlign: "center",
   },
 });

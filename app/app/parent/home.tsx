@@ -13,8 +13,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "../../src/auth/AuthContext";
 import { AppStateCard } from "../../src/components/AppStateCard";
-import { BottomNavBar } from "../../src/components/BottomNavBar";
 import { ChildBanner } from "../../src/components/parentHome/ChildBanner";
+import { HomeBottomNav } from "../../src/components/parentHome/HomeBottomNav";
 import { HomeHeroControls } from "../../src/components/parentHome/HomeHeroControls";
 import { QuickActionsGrid } from "../../src/components/parentHome/QuickActionsGrid";
 import HeroCornerDecor from "../../assets/parent/home/hero/hero-corner-decor-mobile.svg";
@@ -37,9 +37,14 @@ import { Typography } from "../../src/theme/typography";
 // no per-daycare remote override is applied on this screen.
 const PARENT_HOME_HERO = require("../../assets/parent/home/hero/hero-background-artwork-mobile.png");
 
-// Hero artwork intrinsic aspect ratio (1179 x 1020) and corner-decor aspect (630 x 182).
+// Hero artwork intrinsic aspect ratio (1179 x 1020).
 const HERO_ASPECT = 1020 / 1179;
-const DECOR_ASPECT = 182 / 630;
+// Figma Hero Corner Decor — slightly narrower/inward vs prior pass to bring shapes closer.
+const DECOR_VIEWPORT = 393;
+const DECOR_WIDTH_RATIO = 560 / DECOR_VIEWPORT;
+const DECOR_HEIGHT_RATIO = 182.007 / DECOR_VIEWPORT;
+const DECOR_LEFT_RATIO = -82 / DECOR_VIEWPORT;
+const DECOR_TOP_RATIO = -41 / DECOR_VIEWPORT;
 // How far the floating summary card overlaps the bottom of the Hero.
 const CARD_OVERLAP = 28;
 
@@ -77,7 +82,10 @@ export default function ParentHomeScreen() {
   };
 
   const heroHeight = Math.round(width * HERO_ASPECT);
-  const decorHeight = Math.round(width * DECOR_ASPECT);
+  const decorWidth = Math.round(width * DECOR_WIDTH_RATIO);
+  const decorHeight = Math.round(width * DECOR_HEIGHT_RATIO);
+  const decorLeft = Math.round(width * DECOR_LEFT_RATIO);
+  const decorTop = Math.round(width * DECOR_TOP_RATIO);
   const cardTop = heroHeight - CARD_OVERLAP;
 
   const [cardHeight, setCardHeight] = useState(150);
@@ -168,10 +176,18 @@ export default function ParentHomeScreen() {
         />
         <View style={styles.heroOverlay} pointerEvents="none" />
         <View
-          style={[styles.heroDecor, { height: decorHeight }]}
+          style={[
+            styles.heroDecor,
+            {
+              width: decorWidth,
+              height: decorHeight,
+              left: decorLeft,
+              top: decorTop,
+            },
+          ]}
           pointerEvents="none"
         >
-          <HeroCornerDecor width={width} height={decorHeight} />
+          <HeroCornerDecor width={decorWidth} height={decorHeight} />
         </View>
         <HomeHeroControls
           topInset={insets.top}
@@ -195,11 +211,7 @@ export default function ParentHomeScreen() {
         style={styles.navWrap}
         onLayout={(e) => setNavHeight(e.nativeEvent.layout.height)}
       >
-        <BottomNavBar
-          activeItem="home"
-          variant="parent"
-          onItemPress={handleBottomNavPress}
-        />
+        <HomeBottomNav activeItem="home" onItemPress={handleBottomNavPress} />
       </View>
     </View>
   );
@@ -208,7 +220,8 @@ export default function ParentHomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
+    // Figma Parent Home page background (warm cream, node 22:45 surface).
+    backgroundColor: "#FFF9F3",
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,
@@ -225,18 +238,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   heroOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: "45%",
-    backgroundColor: "rgba(0,0,0,0.08)",
+    ...StyleSheet.absoluteFillObject,
+    // Figma node 4:6 — uniform tint over the full hero (no bottom band cut).
+    backgroundColor: "rgba(31,58,43,0.12)",
   },
   heroDecor: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
   },
   summaryWrap: {
     position: "absolute",
