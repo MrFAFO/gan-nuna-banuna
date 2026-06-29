@@ -229,7 +229,7 @@ export default function TeacherHomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.pageBackground,
   },
   screenContent: {
     paddingBottom: Spacing.xxl,
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 300,
     position: "relative",
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.pageBackground,
     borderBottomLeftRadius: BorderRadius.xl,
     borderBottomRightRadius: BorderRadius.xl,
     overflow: "hidden",
