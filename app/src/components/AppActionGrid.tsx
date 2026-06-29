@@ -1,10 +1,10 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Image } from "expo-image";
 
 import { Colors } from "../theme/colors";
-import { BorderRadius, Shadow } from "../theme/spacing";
+import { BorderRadius, Shadow, Spacing } from "../theme/spacing";
 import { IllustratedIcon } from "./IllustratedIcon";
 import type { IllustratedIconName } from "../theme/illustratedIcons";
 
@@ -21,6 +21,8 @@ export interface AppActionItem {
 
 interface AppActionGridProps {
   actions: AppActionItem[];
+  /** Horizontal inset from screen edges (default: 2 × Spacing.md) */
+  horizontalInset?: number;
 }
 
 /**
@@ -30,9 +32,14 @@ interface AppActionGridProps {
  * optimized; until then pass `iconName` to render the IllustratedIcon placeholder.
  * See docs/16-design-system.md.
  */
-export function AppActionGrid({ actions }: AppActionGridProps) {
+export function AppActionGrid({ actions, horizontalInset = Spacing.md * 2 }: AppActionGridProps) {
+  const { width } = useWindowDimensions();
+  const contentWidth = width - horizontalInset;
+  const columnGap = Spacing.sm;
+  const cardWidth = (contentWidth - columnGap * 2) / 3;
+
   return (
-    <View style={styles.grid}>
+    <View style={[styles.grid, { columnGap, rowGap: columnGap }]}>
       {actions.map((action) => (
         <TouchableOpacity
           key={action.id}
@@ -43,7 +50,7 @@ export function AppActionGrid({ actions }: AppActionGridProps) {
             action.accessibilityLabel ??
             `${action.title}${action.subtitle ? `. ${action.subtitle}` : ""}`
           }
-          style={styles.card}
+          style={[styles.card, { width: cardWidth }]}
         >
           {action.illustration ? (
             <Image
@@ -73,11 +80,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row-reverse",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    rowGap: 12,
   },
   card: {
-    width: "31.6%",
     height: 116,
     backgroundColor: Colors.white,
     borderRadius: BorderRadius.sm + 2, // 10

@@ -5,12 +5,13 @@ import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+import { AppActionGrid } from "../../src/components/AppActionGrid";
 import { AppCard } from "../../src/components/AppCard";
 import { AppHeader } from "../../src/components/AppHeader";
 import { AppScreen } from "../../src/components/AppScreen";
 import { AppStateCard } from "../../src/components/AppStateCard";
+import { AppSummaryCard } from "../../src/components/AppSummaryCard";
 import { BottomNavBar } from "../../src/components/BottomNavBar";
-import { IllustratedIcon } from "../../src/components/IllustratedIcon";
 import { useAsyncData } from "../../src/hooks/useAsyncData";
 import { useNotifications } from "../../src/notifications/NotificationsContext";
 import { useBottomNavPress } from "../../src/navigation/useBottomNavPress";
@@ -78,30 +79,46 @@ export default function TeacherHomeScreen() {
     year: "numeric",
   });
 
-  const summaryItems: { label: string; value: number; text?: string; icon: IllustratedIconName }[] =
-    summary
-      ? [
-          {
-            label: "ילדים בגן",
-            value: children.length,
-            text: `מתוך ${summary.totalChildren}`,
-            icon: "children",
-          },
-          {
-            label: "נוכחים היום",
-            value: summary.presentChildren,
-            text: "היום",
-            icon: "attendance",
-          },
-          { label: "התראות חדשות", value: unreadCount, text: "שלא נקראו", icon: "messages" },
-          {
-            label: "חוזים ממתינים",
-            value: pendingContractsCount,
-            text: "לחתימה",
-            icon: "contracts",
-          },
-        ]
-      : [];
+  const summaryItems = summary
+    ? [
+        {
+          key: "children",
+          label: "ילדים בגן",
+          value: String(children.length),
+          subtext: `מתוך ${summary.totalChildren}`,
+          iconName: "children" as IllustratedIconName,
+        },
+        {
+          key: "present",
+          label: "נוכחים היום",
+          value: String(summary.presentChildren),
+          subtext: "היום",
+          iconName: "attendance" as IllustratedIconName,
+        },
+        {
+          key: "notifications",
+          label: "התראות חדשות",
+          value: String(unreadCount),
+          subtext: "שלא נקראו",
+          iconName: "messages" as IllustratedIconName,
+        },
+        {
+          key: "contracts",
+          label: "חוזים ממתינים",
+          value: String(pendingContractsCount),
+          subtext: "לחתימה",
+          iconName: "contracts" as IllustratedIconName,
+        },
+      ]
+    : [];
+
+  const actionItems = TEACHER_ACTIONS.map((action) => ({
+    id: action.id,
+    title: action.label,
+    subtitle: action.subtitle,
+    iconName: action.icon,
+    onPress: () => router.push(action.route),
+  }));
 
   return (
     <View style={styles.root}>
@@ -143,28 +160,7 @@ export default function TeacherHomeScreen() {
             />
           ) : (
             <>
-              <AppCard style={styles.summaryCard}>
-                <View style={styles.summaryHeader}>
-                  <Text style={styles.summaryTitle}>סיכום היום</Text>
-                  <Text style={styles.summaryDate}>{formattedDate}</Text>
-                </View>
-                <View style={styles.statsGrid}>
-                  {summaryItems.map((item) => (
-                    <View key={item.label} style={styles.statItem}>
-                      <Text style={styles.statLabel} numberOfLines={1}>
-                        {item.label}
-                      </Text>
-                      <IllustratedIcon name={item.icon} width={90} height={84} style={styles.statIcon} />
-                      <Text style={styles.statValue}>{item.value}</Text>
-                      {item.text ? (
-                        <Text style={styles.statText} numberOfLines={1}>
-                          {item.text}
-                        </Text>
-                      ) : null}
-                    </View>
-                  ))}
-                </View>
-              </AppCard>
+              <AppSummaryCard items={summaryItems} dateText={formattedDate} />
 
               {pendingContractsCount > 0 ? (
                 <TouchableOpacity
@@ -190,28 +186,7 @@ export default function TeacherHomeScreen() {
                 </TouchableOpacity>
               ) : null}
 
-              <View style={styles.actionsGrid}>
-                {TEACHER_ACTIONS.map((action) => (
-                  <TouchableOpacity
-                    key={action.id}
-                    activeOpacity={0.85}
-                    onPress={() => router.push(action.route)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${action.label}, ${action.subtitle}`}
-                    style={styles.actionPressable}
-                  >
-                    <AppCard style={styles.actionCard}>
-                      <IllustratedIcon name={action.icon} width={78} height={72} />
-                      <Text style={styles.actionLabel} numberOfLines={1}>
-                        {action.label}
-                      </Text>
-                      <Text style={styles.actionSubtitle} numberOfLines={1}>
-                        {action.subtitle}
-                      </Text>
-                    </AppCard>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <AppActionGrid actions={actionItems} />
             </>
           )}
         </View>
@@ -292,54 +267,6 @@ const styles = StyleSheet.create({
     marginTop: -Spacing.xl,
     gap: Spacing.md,
   },
-  summaryCard: {
-    gap: Spacing.md,
-  },
-  summaryHeader: {
-    flexDirection: "row-reverse",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  summaryTitle: {
-    ...Typography.title,
-    color: Colors.textPrimary,
-  },
-  summaryDate: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
-  },
-  statsGrid: {
-    flexDirection: "row-reverse",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: Spacing.sm,
-  },
-  statItem: {
-    flexBasis: "47%",
-    flexGrow: 1,
-    alignItems: "center",
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.md,
-    backgroundColor: Colors.background,
-  },
-  statIcon: {
-    marginVertical: 4,
-  },
-  statValue: {
-    ...Typography.title,
-    color: Colors.primary,
-  },
-  statLabel: {
-    ...Typography.label,
-    color: Colors.textPrimary,
-    textAlign: "center",
-  },
-  statText: {
-    ...Typography.label,
-    color: Colors.textSecondary,
-    textAlign: "center",
-    marginTop: 2,
-  },
   reminderCard: {
     backgroundColor: Colors.sentBackground,
     borderColor: Colors.reminderBorder,
@@ -369,32 +296,5 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     color: Colors.sentText ?? Colors.textSecondary,
     marginTop: 2,
-  },
-  actionsGrid: {
-    flexDirection: "row-reverse",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    rowGap: Spacing.md,
-  },
-  actionPressable: {
-    width: "31.5%",
-  },
-  actionCard: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.xs,
-    gap: 4,
-  },
-  actionLabel: {
-    ...Typography.captionMedium,
-    color: Colors.textPrimary,
-    textAlign: "center",
-    marginTop: 4,
-  },
-  actionSubtitle: {
-    ...Typography.label,
-    color: Colors.textSecondary,
-    textAlign: "center",
   },
 });

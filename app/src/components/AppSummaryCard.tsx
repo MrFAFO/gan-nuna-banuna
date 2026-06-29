@@ -1,10 +1,10 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Image } from "expo-image";
 
 import { Colors } from "../theme/colors";
-import { BorderRadius, Shadow } from "../theme/spacing";
+import { BorderRadius, Shadow, Spacing } from "../theme/spacing";
 import { IllustratedIcon } from "./IllustratedIcon";
 import type { IllustratedIconName } from "../theme/illustratedIcons";
 
@@ -12,6 +12,8 @@ export interface AppSummaryItem {
   key: string;
   label: string;
   value: string;
+  /** Optional hint below the value (e.g. "מתוך 12") */
+  subtext?: string;
   /** Bespoke illustration (optimized PNG). Falls back to `iconName` placeholder. */
   illustration?: ImageSourcePropType;
   iconName?: IllustratedIconName;
@@ -22,6 +24,8 @@ interface AppSummaryCardProps {
   title?: string;
   /** Defaults to today's Hebrew date. Pass "" to hide. */
   dateText?: string;
+  /** Horizontal inset from screen edges (default: 2 × Spacing.md) */
+  horizontalInset?: number;
 }
 
 function formatTodayHebrew(): string {
@@ -41,8 +45,18 @@ function formatTodayHebrew(): string {
  * rounded card holding a row of warm mini-tiles, each with a label, illustration
  * and a value. See docs/16-design-system.md.
  */
-export function AppSummaryCard({ items, title = "סיכום היום", dateText }: AppSummaryCardProps) {
+export function AppSummaryCard({
+  items,
+  title = "סיכום היום",
+  dateText,
+  horizontalInset = Spacing.md * 2,
+}: AppSummaryCardProps) {
+  const { width } = useWindowDimensions();
   const date = dateText ?? formatTodayHebrew();
+  const cardPadding = 16;
+  const columnGap = Spacing.sm;
+  const innerWidth = width - horizontalInset - cardPadding * 2;
+  const itemWidth = (innerWidth - columnGap * 3) / 4;
 
   return (
     <View style={styles.card}>
@@ -57,9 +71,9 @@ export function AppSummaryCard({ items, title = "סיכום היום", dateText 
         ) : null}
       </View>
 
-      <View style={styles.grid}>
+      <View style={[styles.grid, { gap: columnGap, height: ITEM_H }]}>
         {items.map((item) => (
-          <View key={item.key} style={styles.item}>
+          <View key={item.key} style={[styles.item, { width: itemWidth, height: ITEM_H }]}>
             <Text
               style={styles.itemLabel}
               numberOfLines={1}
@@ -80,9 +94,17 @@ export function AppSummaryCard({ items, title = "סיכום היום", dateText 
                 <IllustratedIcon name={item.iconName ?? "calendar"} width={90} height={84} />
               )}
             </View>
-            <Text style={styles.itemValue} numberOfLines={1}>
+            <Text
+              style={[styles.itemValue, item.subtext ? styles.itemValueWithSubtext : undefined]}
+              numberOfLines={1}
+            >
               {item.value}
             </Text>
+            {item.subtext ? (
+              <Text style={styles.itemSubtext} numberOfLines={1}>
+                {item.subtext}
+              </Text>
+            ) : null}
           </View>
         ))}
       </View>
@@ -126,12 +148,8 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: "row-reverse",
-    gap: 8,
-    height: ITEM_H,
   },
   item: {
-    flex: 1,
-    height: ITEM_H,
     backgroundColor: Colors.surfaceWarm,
     borderWidth: 1,
     borderColor: Colors.borderWarm,
@@ -172,6 +190,20 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: "700",
     color: Colors.brandGreen,
+    textAlign: "center",
+  },
+  itemValueWithSubtext: {
+    bottom: 18,
+  },
+  itemSubtext: {
+    position: "absolute",
+    bottom: 6,
+    left: 0,
+    right: 0,
+    fontSize: 9,
+    lineHeight: 11,
+    fontWeight: "500",
+    color: Colors.textMutedGreen,
     textAlign: "center",
   },
 });

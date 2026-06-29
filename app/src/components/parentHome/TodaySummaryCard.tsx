@@ -1,19 +1,9 @@
 import React from "react";
-import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Image } from "expo-image";
 
-import { Spacing } from "../../theme/spacing";
 import { HomeAssets } from "./homeAssets";
-
-/** Figma reference frame — cap layout so web/desktop does not inflate cells */
-const FIGMA_FRAME_W = 393;
-const SUMMARY_MARGIN = Spacing.md;
-const CARD_PADDING = Spacing.md;
-const COLUMN_GAP = Spacing.sm;
-/** Figma mini-card (node 36:24) */
-const ITEM_H = 99;
-const ILLUSTRATION_ASPECT = 84 / 90;
 
 export interface SummaryValues {
   events: string;
@@ -27,6 +17,10 @@ interface SummaryItem {
   label: string;
   illustration: ImageSourcePropType;
 }
+
+/** Larger than Quick Actions — summary mini-cards have more vertical room. */
+const ILLUSTRATION_W = 90;
+const ILLUSTRATION_H = 84;
 
 /**
  * Figma node 36:24. RTL visual order (right → left): upcoming events,
@@ -56,18 +50,8 @@ interface TodaySummaryCardProps {
 }
 
 export function TodaySummaryCard({ values }: TodaySummaryCardProps) {
-  const { width: screenWidth } = useWindowDimensions();
-  const layoutWidth = Math.min(screenWidth, FIGMA_FRAME_W);
-  const cardOuterWidth = layoutWidth - SUMMARY_MARGIN * 2;
-  const innerWidth = cardOuterWidth - CARD_PADDING * 2;
-  const itemWidth = (innerWidth - COLUMN_GAP * 3) / 4;
-  const illustrationWidth = Math.round(Math.min(56, itemWidth - 12));
-  const illustrationHeight = Math.round(illustrationWidth * ILLUSTRATION_ASPECT);
-  const illustrationTop = 24;
-  const illustrationLeft = (itemWidth - illustrationWidth) / 2;
-
   return (
-    <View style={[styles.card, { width: cardOuterWidth, alignSelf: "center" }]}>
+    <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.headerTitle} numberOfLines={1}>
           סיכום היום
@@ -77,24 +61,20 @@ export function TodaySummaryCard({ values }: TodaySummaryCardProps) {
         </Text>
       </View>
 
-      <View style={[styles.grid, { width: innerWidth, gap: COLUMN_GAP, height: ITEM_H }]}>
+      <View style={styles.grid}>
         {SUMMARY_ITEMS.map((item) => (
-          <View
-            key={item.key}
-            style={[styles.item, { width: itemWidth, height: ITEM_H }]}
-          >
-            <Text style={styles.itemLabel} numberOfLines={2}>
+          <View key={item.key} style={styles.item}>
+            <Text
+              style={styles.itemLabel}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
+            >
               {item.label}
             </Text>
             <Image
               source={item.illustration}
-              style={{
-                position: "absolute",
-                top: illustrationTop,
-                left: illustrationLeft,
-                width: illustrationWidth,
-                height: illustrationHeight,
-              }}
+              style={styles.itemIllustration}
               contentFit="contain"
               transition={120}
             />
@@ -109,14 +89,17 @@ export function TodaySummaryCard({ values }: TodaySummaryCardProps) {
 }
 
 const DARK_GREEN = "#315A44";
+/** Mini-card height — taller than Figma 99px so 78×72 icons + bottom values fit. */
+const ITEM_H = 118;
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     paddingTop: 12,
-    paddingHorizontal: CARD_PADDING,
-    paddingBottom: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 18,
+    // Figma: drop-shadow 0 5 8 rgba(31,58,43,0.08)
     shadowColor: "#1F3A2B",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.08,
@@ -146,9 +129,12 @@ const styles = StyleSheet.create({
   },
   grid: {
     flexDirection: "row-reverse",
-    alignSelf: "center",
+    gap: 8,
+    height: ITEM_H,
   },
   item: {
+    flex: 1,
+    height: ITEM_H,
     backgroundColor: "#FFFCF8",
     borderWidth: 1,
     borderColor: "#F1E6D7",
@@ -157,22 +143,30 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     position: "absolute",
-    top: 5,
-    left: 3,
-    right: 3,
-    fontSize: 8,
-    lineHeight: 10,
+    top: 7,
+    left: 0,
+    right: 0,
+    fontSize: 9,
+    lineHeight: 12,
     fontWeight: "500",
     color: DARK_GREEN,
     textAlign: "center",
   },
+  itemIllustration: {
+    position: "absolute",
+    top: 14,
+    left: "50%",
+    marginLeft: -(ILLUSTRATION_W / 2),
+    width: ILLUSTRATION_W,
+    height: ILLUSTRATION_H,
+  },
   itemValue: {
     position: "absolute",
-    bottom: 6,
+    bottom: 8,
     left: 0,
     right: 0,
-    fontSize: 14,
-    lineHeight: 18,
+    fontSize: 16,
+    lineHeight: 20,
     fontWeight: "700",
     color: DARK_GREEN,
     textAlign: "center",
