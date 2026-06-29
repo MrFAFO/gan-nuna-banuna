@@ -154,7 +154,7 @@ export default function TeacherHomeScreen() {
                       <Text style={styles.statLabel} numberOfLines={1}>
                         {item.label}
                       </Text>
-                      <IllustratedIcon name={item.icon} size={44} style={styles.statIcon} />
+                      <IllustratedIcon name={item.icon} width={90} height={84} style={styles.statIcon} />
                       <Text style={styles.statValue}>{item.value}</Text>
                       {item.text ? (
                         <Text style={styles.statText} numberOfLines={1}>
@@ -201,7 +201,7 @@ export default function TeacherHomeScreen() {
                     style={styles.actionPressable}
                   >
                     <AppCard style={styles.actionCard}>
-                      <IllustratedIcon name={action.icon} size={56} />
+                      <IllustratedIcon name={action.icon} width={78} height={72} />
                       <Text style={styles.actionLabel} numberOfLines={1}>
                         {action.label}
                       </Text>

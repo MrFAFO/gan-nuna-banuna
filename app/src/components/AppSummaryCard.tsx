@@ -77,7 +77,7 @@ export function AppSummaryCard({ items, title = "סיכום היום", dateText 
                   transition={120}
                 />
               ) : (
-                <IllustratedIcon name={item.iconName ?? "calendar"} size={64} />
+                <IllustratedIcon name={item.iconName ?? "calendar"} width={90} height={84} />
               )}
             </View>
             <Text style={styles.itemValue} numberOfLines={1}>

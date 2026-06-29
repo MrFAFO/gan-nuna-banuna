@@ -53,7 +53,7 @@ export function AppActionGrid({ actions }: AppActionGridProps) {
               transition={120}
             />
           ) : (
-            <IllustratedIcon name={action.iconName ?? "calendar"} size={72} />
+            <IllustratedIcon name={action.iconName ?? "calendar"} width={78} height={72} />
           )}
           <Text style={styles.title} numberOfLines={1}>
             {action.title}
