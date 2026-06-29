@@ -15,28 +15,26 @@ interface ChildBannerProps {
 const FIGMA_W = 361;
 const FIGMA_H = 86;
 
-const PENDING_SUBTITLE = "יש טופס מהגן\nהממתין לחתימה";
+const SUBTITLE_LINE_1 = "כל העדכונים";
+const SUBTITLE_LINE_2 = "והאירועים החשובים בגן";
+const CTA_LABEL = "לכל הפרטים";
 
 /**
  * Figma node 26:34 — fixed LTR layout inside the banner (matches Figma layer order).
+ * Visual copy is always static; `pending` only affects the status-dot tint.
  */
 export function ChildBanner({ childName, pending, onPress }: ChildBannerProps) {
   const [bannerWidth, setBannerWidth] = useState(FIGMA_W);
   const sx = bannerWidth / FIGMA_W;
 
   const name = childName.trim().length > 0 ? childName : "ילד/ה";
-  const cta = pending ? "לצפייה ולחתימה" : "לכל הפרטים";
 
   return (
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={
-        pending
-          ? `היום של ${name}. יש טופס מהגן הממתין לחתימה`
-          : `היום של ${name}. כל העדכונים והרגעים החשובים מהגן`
-      }
+      accessibilityLabel={`היום של ${name}. ${SUBTITLE_LINE_1} ${SUBTITLE_LINE_2}`}
       style={styles.banner}
       onLayout={(e) => setBannerWidth(e.nativeEvent.layout.width)}
     >
@@ -47,31 +45,24 @@ export function ChildBanner({ childName, pending, onPress }: ChildBannerProps) {
       />
 
       <View style={styles.layer}>
-        <Text
-          style={[styles.title, { width: 121 * sx }]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.85}
-        >
-          היום של {name}
-        </Text>
-
-        {pending ? (
+        <View style={[styles.textBlock, { left: -47 * sx, width: 280 * sx }]}>
           <Text
-            style={[styles.subtitle, { left: -47 * sx, width: 280 * sx }]}
+            style={styles.title}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.85}
           >
-            {PENDING_SUBTITLE}
+            היום של {name}
           </Text>
-        ) : (
-          <View style={[styles.subtitleWrap, { left: -47 * sx, width: 280 * sx }]}>
-            <Text style={styles.subtitleLine}>כל העדכונים</Text>
-            <Text style={styles.subtitleLine}>והרגעים החשובים מהגן</Text>
+          <View style={styles.subtitleGroup}>
+            <Text style={styles.subtitleLine}>{SUBTITLE_LINE_1}</Text>
+            <Text style={styles.subtitleLine}>{SUBTITLE_LINE_2}</Text>
           </View>
-        )}
+        </View>
 
         <View style={[styles.ctaPill, { left: 52 * sx, width: 79 * sx }]}>
           <Text style={styles.ctaText} numberOfLines={1}>
-            {cta}
+            {CTA_LABEL}
           </Text>
         </View>
 
@@ -140,36 +131,29 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     direction: "ltr",
   },
-  title: {
+  textBlock: {
     position: "absolute",
-    left: 0,
     top: 10,
+    alignItems: "center",
+    gap: 4,
+  },
+  title: {
     fontSize: 10,
     lineHeight: 13,
     fontWeight: "500",
     color: DARK_GREEN,
-    textAlign: "right",
-    writingDirection: "rtl",
-  },
-  subtitleWrap: {
-    position: "absolute",
-    top: 27,
-    alignItems: "center",
-    gap: 1,
-  },
-  subtitle: {
-    position: "absolute",
-    top: 27,
-    fontSize: 8,
-    lineHeight: 11,
-    fontWeight: "400",
-    color: "#647166",
     textAlign: "center",
     writingDirection: "rtl",
+    width: "100%",
+  },
+  subtitleGroup: {
+    alignItems: "center",
+    gap: 0,
+    marginTop: -1,
   },
   subtitleLine: {
     fontSize: 8,
-    lineHeight: 11,
+    lineHeight: 10,
     fontWeight: "400",
     color: "#647166",
     textAlign: "center",

@@ -11,6 +11,16 @@ import type { ImageSourcePropType } from "react-native";
  * Paths are relative to app/src/components/parentHome.
  */
 
+/**
+ * Parent Home surface colors (from approved Figma assets).
+ * pageBackground — soft tint of hero decor green, blended toward white.
+ * cardSurface — warm white for floating cards (towards beige).
+ */
+export const ParentHomeColors = {
+  pageBackground: "#EBF2E0",
+  cardSurface: "#FFFBF6",
+} as const;
+
 export const HomeAssets = {
   hero: {
     background: require("../../../assets/parent/home/hero/hero-background-artwork-mobile.png") as ImageSourcePropType,
