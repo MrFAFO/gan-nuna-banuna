@@ -16,6 +16,7 @@ import { AppStateCard } from "../../src/components/AppStateCard";
 import { ChildBanner } from "../../src/components/parentHome/ChildBanner";
 import { HomeBottomNav } from "../../src/components/parentHome/HomeBottomNav";
 import { HomeHeroControls } from "../../src/components/parentHome/HomeHeroControls";
+import { ParentHomeColors } from "../../src/components/parentHome/homeAssets";
 import { QuickActionsGrid } from "../../src/components/parentHome/QuickActionsGrid";
 import HeroCornerDecor from "../../assets/parent/home/hero/hero-corner-decor-mobile.svg";
 import {
@@ -46,7 +47,9 @@ const DECOR_HEIGHT_RATIO = 182.007 / DECOR_VIEWPORT;
 const DECOR_LEFT_RATIO = -82 / DECOR_VIEWPORT;
 const DECOR_TOP_RATIO = -41 / DECOR_VIEWPORT;
 // How far the floating summary card overlaps the bottom of the Hero.
-const CARD_OVERLAP = 28;
+// Slightly increased overlap + shorter hero shell → more room for scroll content.
+const HERO_HEIGHT_SCALE = 1.02;
+const CARD_OVERLAP = 42;
 
 export default function ParentHomeScreen() {
   const router = useRouter();
@@ -81,7 +84,7 @@ export default function ParentHomeScreen() {
     children: data ? String(childrenCount) : "—",
   };
 
-  const heroHeight = Math.round(width * HERO_ASPECT);
+  const heroHeight = Math.round(width * HERO_ASPECT * HERO_HEIGHT_SCALE);
   const decorWidth = Math.round(width * DECOR_WIDTH_RATIO);
   const decorHeight = Math.round(width * DECOR_HEIGHT_RATIO);
   const decorLeft = Math.round(width * DECOR_LEFT_RATIO);
@@ -221,7 +224,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     // Figma Parent Home page background (warm cream, node 22:45 surface).
-    backgroundColor: "#FFF9F3",
+    backgroundColor: ParentHomeColors.pageBackground,
   },
   scrollContent: {
     paddingHorizontal: Spacing.md,

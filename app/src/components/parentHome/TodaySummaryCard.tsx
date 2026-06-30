@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { Image } from "expo-image";
 
-import { HomeAssets } from "./homeAssets";
+import { HomeAssets, ParentHomeColors } from "./homeAssets";
 
 export interface SummaryValues {
   events: string;
@@ -94,7 +94,7 @@ const ITEM_H = 118;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: ParentHomeColors.cardSurface,
     borderRadius: 20,
     paddingTop: 12,
     paddingHorizontal: 16,

@@ -5,7 +5,7 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 
-import { HomeAssets } from "./homeAssets";
+import { HomeAssets, ParentHomeColors } from "./homeAssets";
 
 interface QuickAction {
   id: string;
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     // 3 columns within a 361-wide content area, 8px column gutter → ~115 each.
     width: "31.6%",
     height: 116,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: ParentHomeColors.cardSurface,
     borderRadius: 10,
     overflow: "hidden",
     alignItems: "center",
